@@ -1,3 +1,3 @@
-export const SUPABASE_URL = "PEGA_AQUI_TU_PROJECT_URL";
-export const SUPABASE_ANON_KEY = "PEGA_AQUI_TU_PUBLISHABLE_ANON_KEY";
+export const SUPABASE_URL = "https://yljeepydhpdqrgqgsborj.supabase.co";
+export const SUPABASE_ANON_KEY = "sb_publishable_AQUI_VA_TODA_TU_CLAVE";
 export const BUCKET = "documents";

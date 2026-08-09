@@ -718,7 +718,7 @@ async function loadMine() {
     "none";
 
 
-  data.forEach(document => {
+  data.forEach(item => {
 
     const tr =
       document.createElement("tr");
@@ -727,19 +727,19 @@ async function loadMine() {
     tr.innerHTML = `
 
       <td>
-        ${formatDate(document.created_at)}
+        ${formatDate(item.created_at)}
       </td>
 
       <td>
-        ${escapeHtml(document.reference)}
+        ${escapeHtml(item.reference)}
       </td>
 
       <td>
-        ${escapeHtml(document.document_type)}
+        ${escapeHtml(item.document_type)}
       </td>
 
       <td>
-        ${escapeHtml(document.original_name)}
+        ${escapeHtml(item.original_name)}
       </td>
 
       <td>
@@ -766,7 +766,7 @@ async function loadMine() {
             await sb.storage
               .from(BUCKET)
               .createSignedUrl(
-                document.file_path,
+                item.file_path,
                 60
               );
 

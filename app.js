@@ -347,9 +347,20 @@ async function showForSession(session) {
     $("logoutBtn").classList.remove("hidden");
 
     $("userEmail").textContent =
-      session.user.email;
+  session.user.email;
 
-    await loadMine();
+const { data: profile, error: profileError } = await sb
+  .from("profiles")
+  .select("role, company")
+  .eq("id", session.user.id)
+  .single();
+
+if (!profileError && profile?.role === "client" && profile?.company) {
+  $("clientName").value = profile.company;
+  $("clientName").readOnly = true;
+}
+
+await loadMine();
 
   } else {
 

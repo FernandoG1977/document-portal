@@ -40,6 +40,13 @@ async function isAdmin(userId) {
 }
 
 async function showView(session) {
+
+
+
+
+
+
+  
   if (!session) {
     $("adminLogin").classList.remove("hidden");
     $("adminView").classList.add("hidden");
@@ -142,7 +149,82 @@ if (clientFilter) {
 
 render();
 }
+async function loadAdminExpedient(clientName) {
 
+  const summary =
+    $("adminExpedientSummary");
+
+  const checklist =
+    $("adminRequirementsChecklist");
+
+  if (!clientName) {
+
+    summary.classList.add("hidden");
+    checklist.classList.add("hidden");
+    checklist.innerHTML = "";
+
+    return;
+  }
+
+  const clientDocuments =
+    docs.filter(
+      d =>
+        d.client_name === clientName
+    );
+
+  if (!clientDocuments.length) {
+
+    summary.classList.add("hidden");
+    checklist.classList.add("hidden");
+
+    return;
+  }
+
+  const userId =
+    clientDocuments[0].user_id;
+
+  if (!userId) {
+
+    console.error(
+      "El cliente no tiene user_id asociado."
+    );
+
+    return;
+  }
+
+  const {
+    data: profile,
+    error: profileError
+  } =
+    await sb
+      .from("profiles")
+      .select(`
+        person_type,
+        operation_type,
+        process_type,
+        has_sector_registry,
+        has_immex,
+        has_prosec,
+        is_certified_company
+      `)
+      .eq("id", userId)
+      .single();
+
+  if (profileError || !profile) {
+
+    console.error(
+      "No fue posible cargar el perfil del cliente:",
+      profileError
+    );
+
+    return;
+  }
+
+  console.log(
+    "PERFIL ADMIN CLIENTE:",
+    profile
+  );
+}
 function render() {
   const q =
     $("search").value
@@ -422,4 +504,14 @@ function render() {
 $("search").addEventListener(
   "input",
   render
+);
+
+$("adminClientFilter")?.addEventListener(
+  "change",
+  async e => {
+
+    await loadAdminExpedient(
+      e.target.value
+    );
+  }
 );

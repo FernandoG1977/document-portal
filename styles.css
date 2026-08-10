@@ -364,67 +364,57 @@ th{
   padding:10px 7px;
   vertical-align:top;
   word-break:normal;
-  overflow-wrap:anywhere;
 }
 
 /* Fecha */
 #adminView th:nth-child(1),
-#adminView td:nth-child(1){
-  width:9%;
-}
+#adminView td:nth-child(1){width:9%;}
 
 /* Cliente */
 #adminView th:nth-child(2),
-#adminView td:nth-child(2){
-  width:11%;
-}
+#adminView td:nth-child(2){width:11%;}
 
 /* Referencia */
 #adminView th:nth-child(3),
-#adminView td:nth-child(3){
-  width:9%;
-}
+#adminView td:nth-child(3){width:9%;}
 
 /* Requisito */
 #adminView th:nth-child(4),
-#adminView td:nth-child(4){
-  width:10%;
-}
+#adminView td:nth-child(4){width:10%;}
 
 /* Archivo */
 #adminView th:nth-child(5),
-#adminView td:nth-child(5){
-  width:17%;
-}
+#adminView td:nth-child(5){width:17%;}
 
 /* Usuario */
 #adminView th:nth-child(6),
-#adminView td:nth-child(6){
-  width:17%;
-}
+#adminView td:nth-child(6){width:16%;}
 
 /* Estado */
 #adminView th:nth-child(7),
-#adminView td:nth-child(7){
-  width:8%;
-}
+#adminView td:nth-child(7){width:8%;}
 
 /* Revisión */
 #adminView th:nth-child(8),
-#adminView td:nth-child(8){
-  width:7%;
-}
+#adminView td:nth-child(8){width:7%;}
 
 /* Acciones */
 #adminView th:nth-child(9),
 #adminView td:nth-child(9){
-  width:12%;
-  min-width:90px;
+  width:13%;
+  min-width:105px;
 }
 
+/* Los textos largos pueden dividirse */
+#adminView td:nth-child(5),
+#adminView td:nth-child(6){
+  overflow-wrap:anywhere;
+}
+
+/* Acciones */
 #adminView .action-link{
   display:block;
-  margin-bottom:6px;
+  margin-bottom:7px;
   white-space:nowrap;
 }
 
@@ -433,11 +423,13 @@ th{
 #adminView .delete-btn{
   display:block;
   width:100%;
-  min-width:82px;
+  min-width:90px;
   margin:5px 0;
-  padding:8px 6px;
+  padding:8px 8px;
   font-size:12px;
-  white-space:nowrap;
+  white-space:nowrap !important;
+  word-break:keep-all !important;
+  overflow-wrap:normal !important;
   text-align:center;
 }
 

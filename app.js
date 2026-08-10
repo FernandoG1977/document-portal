@@ -27,27 +27,80 @@ const safeFileName = name =>
     .replace(/[\u0300-\u036f]/g, "")
    .replace(/[^a-zA-Z0-9._-]/g, "_");
 
-async function loadRequirements() {
+async function loadRequirements(profile) {
   const select = $("requirementCode");
 
-  if (!select) return;
+  if (!select || !profile) return;
 
-  select.innerHTML = '<option value="">Selecciona un requisito</option>';
+  select.innerHTML =
+    '<option value="">Selecciona un requisito</option>';
 
-  const { data, error } = await sb
-    .from("document_requirements")
-    .select("code, title, category, sort_order")
-    .order("sort_order", { ascending: true });
+  // Obtener las reglas aplicables al perfil del cliente
+  const { data: rules, error: rulesError } = await sb
+    .from("requirement_rules")
+    .select("requirement_code, requirement_level")
+    .eq("person_type", profile.person_type)
+    .eq("operation_type", profile.operation_type)
+    .eq("process_type", profile.process_type);
 
-  if (error) {
-    console.error("Error al cargar requisitos:", error);
+  if (rulesError) {
+    console.error("Error al cargar reglas:", rulesError);
     return;
   }
 
-  data.forEach(item => {
+  // Resolver requisitos condicionales
+  const applicableRules = rules.filter(rule => {
+
+    if (rule.requirement_code === "REQ-12") {
+      return profile.has_sector_registry === true;
+    }
+
+    if (rule.requirement_code === "REQ-15") {
+      return (
+        profile.has_immex === true ||
+        profile.has_prosec === true ||
+        profile.is_certified_company === true
+      );
+    }
+
+    return rule.requirement_level !== "not_applicable";
+  });
+
+  const codes = applicableRules.map(rule => rule.requirement_code);
+
+  if (!codes.length) return;
+
+  // Obtener los nombres de los requisitos
+  const { data: requirements, error: requirementsError } = await sb
+    .from("document_requirements")
+    .select("code, title, sort_order")
+    .in("code", codes)
+    .order("sort_order", { ascending: true });
+
+  if (requirementsError) {
+    console.error(
+      "Error al cargar requisitos:",
+      requirementsError
+    );
+    return;
+  }
+
+  requirements.forEach(item => {
+    const rule = applicableRules.find(
+      r => r.requirement_code === item.code
+    );
+
     const option = document.createElement("option");
     option.value = item.code;
-    option.textContent = `${item.code} - ${item.title}`;
+
+    const label =
+      rule?.requirement_level === "optional"
+        ? "Opcional"
+        : "Obligatorio";
+
+    option.textContent =
+      `${item.code} - ${item.title} (${label})`;
+
     select.appendChild(option);
   });
 }
@@ -375,7 +428,17 @@ async function showForSession(session) {
 
 const { data: profile, error: profileError } = await sb
   .from("profiles")
-  .select("role, company")
+  .select(`
+  role,
+  company,
+  person_type,
+  operation_type,
+  process_type,
+  has_sector_registry,
+  has_immex,
+  has_prosec,
+  is_certified_company
+`)
   .eq("id", session.user.id)
   .single();
 
@@ -386,7 +449,7 @@ if (!profileError && profile?.role === "client" && profile?.company) {
 $("userEmail").textContent =
   session.user.email;
 
-await loadRequirements();
+await loadRequirements(profile);
 await loadMine();
 
   } else {

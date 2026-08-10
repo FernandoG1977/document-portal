@@ -810,157 +810,32 @@ async function loadMine() {
 
 
   /* ================================================
-     PERFIL DEL CLIENTE
-     ================================================ */
+REQUISITOS YA CARGADOS EN EL PORTAL
+================================================ */
 
-  const {
-    data: profile,
-    error: profileError
-  } =
-    await sb
-      .from("profiles")
-      .select(`
-        person_type,
-        operation_type,
-        process_type,
-        has_sector_registry,
-        has_immex,
-        has_prosec,
-        is_certified_company
-      `)
-      .eq("id", user.id)
-      .single();
+const requirementSelect =
+  $("requirementCode");
 
+const requirements =
+  [...requirementSelect.options]
+    .filter(option => option.value)
+    .map(option => {
 
-  if (profileError || !profile) {
+      const text =
+        option.textContent.trim();
 
-    console.error(
-      "Error al cargar perfil:",
-      profileError
-    );
+      const separator =
+        text.indexOf(" - ");
 
-    return;
-  }
+      return {
+        code: option.value,
 
-
-  /* ================================================
-     REGLAS APLICABLES
-     ================================================ */
-
-  const {
-    data: rules,
-    error: rulesError
-  } =
-    await sb
-      .from("requirement_rules")
-      .select(`
-        requirement_code,
-        requirement_level
-      `)
-      .eq(
-        "person_type",
-        profile.person_type
-      )
-      .eq(
-        "operation_type",
-        profile.operation_type
-      )
-      .eq(
-        "process_type",
-        profile.process_type
-      );
-
-
-  if (rulesError) {
-
-    console.error(
-      "Error al cargar reglas:",
-      rulesError
-    );
-
-    return;
-  }
-
-
-  const applicableRules =
-    (rules || []).filter(rule => {
-
-      if (
-        rule.requirement_code === "REQ-12"
-      ) {
-        return (
-          profile.has_sector_registry === true
-        );
-      }
-
-
-      if (
-        rule.requirement_code === "REQ-15"
-      ) {
-        return (
-          profile.has_immex === true ||
-          profile.has_prosec === true ||
-          profile.is_certified_company === true
-        );
-      }
-
-
-      return (
-        rule.requirement_level !==
-        "not_applicable"
-      );
+        title:
+          separator >= 0
+            ? text.substring(separator + 3)
+            : text
+      };
     });
-
-
-  const codes =
-    applicableRules.map(
-      rule => rule.requirement_code
-    );
-
-
-  /* ================================================
-     NOMBRES DE LOS REQUISITOS
-     ================================================ */
-
-  let requirements = [];
-
-
-  if (codes.length) {
-
-    const {
-      data: requirementData,
-      error: requirementError
-    } =
-      await sb
-        .from("document_requirements")
-        .select(`
-          code,
-          title,
-          sort_order
-        `)
-        .in("code", codes)
-        .order(
-          "sort_order",
-          {
-            ascending: true
-          }
-        );
-
-
-    if (requirementError) {
-
-      console.error(
-        "Error al cargar requisitos:",
-        requirementError
-      );
-
-      return;
-    }
-
-
-    requirements =
-      requirementData || [];
-  }
 
 
   /* ================================================

@@ -877,16 +877,7 @@ const requirements =
 
 
   requirements.forEach(req => {
-const openRequirementButton =
-  documentForRequirement
-    ? `
-      <a
-        href="#"
-        class="requirement-open">
-        Abrir
-      </a>
-    `
-    : "";
+
    const documentForRequirement =
   documents.find(
     doc =>

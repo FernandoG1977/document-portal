@@ -827,32 +827,54 @@ async function loadMine() {
       document.createElement("tr");
 
 
-    tr.innerHTML = `
+    const requirement =
+  item.requirement_code ||
+  item.document_type ||
+  "—";
 
-      <td>
-        ${formatDate(item.created_at)}
-      </td>
+const status =
+  item.status === "approved"
+    ? "Aprobado"
+    : item.status === "rejected"
+      ? "Rechazado"
+      : "Pendiente";
 
-      <td>
-        ${escapeHtml(item.reference)}
-      </td>
+const observations =
+  item.review_comments || "—";
 
-      <td>
-        ${escapeHtml(item.document_type)}
-      </td>
+tr.innerHTML = `
+  <td>
+    ${formatDate(item.created_at)}
+  </td>
 
-      <td>
-        ${escapeHtml(item.original_name)}
-      </td>
+  <td>
+    ${escapeHtml(item.reference)}
+  </td>
 
-      <td>
-        <a
-          href="#"
-          class="action-link">
-          Abrir
-        </a>
-      </td>
-    `;
+  <td>
+    ${escapeHtml(requirement)}
+  </td>
+
+  <td>
+    ${escapeHtml(item.original_name)}
+  </td>
+
+  <td>
+    <strong>${escapeHtml(status)}</strong>
+  </td>
+
+  <td>
+    ${escapeHtml(observations)}
+  </td>
+
+  <td>
+    <a
+      href="#"
+      class="action-link">
+      Abrir
+    </a>
+  </td>
+`;
 
 
     tr.querySelector("a")

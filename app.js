@@ -32,6 +32,8 @@ async function loadRequirements(profile) {
 
   if (!select || !profile) return;
 
+  console.log("PERFIL CLIENTE:", profile);
+
   select.innerHTML =
     '<option value="">Selecciona un requisito</option>';
 

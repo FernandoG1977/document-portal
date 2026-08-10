@@ -452,7 +452,7 @@ $("userEmail").textContent =
   session.user.email;
 
 await loadRequirements(profile);
-await loadMine();
+await ;
 
   } else {
 
@@ -887,40 +887,34 @@ const requirements =
       );
 
 
-    let state =
-      "Falta cargar";
+    let state = "Falta cargar";
+let stateClass = "state-missing";
 
+if (documentForRequirement) {
 
-    if (documentForRequirement) {
+  if (documentForRequirement.status === "approved") {
 
-      if (
-        documentForRequirement.status ===
-        "approved"
-      ) {
+    state = "Aprobado";
+    stateClass = "state-approved";
+    approvedCount++;
 
-        state = "Aprobado";
-        approvedCount++;
+  } else if (documentForRequirement.status === "rejected") {
 
-      } else if (
-        documentForRequirement.status ===
-        "rejected"
-      ) {
+    state = "Rechazado";
+    stateClass = "state-rejected";
+    pendingCount++;
 
-        state = "Rechazado";
-        pendingCount++;
+  } else {
 
-      } else {
+    state = "Pendiente de revisión";
+    stateClass = "state-pending";
+    pendingCount++;
+  }
 
-        state =
-          "Pendiente de revisión";
+} else {
 
-        pendingCount++;
-      }
-
-    } else {
-
-      missingCount++;
-    }
+  missingCount++;
+}
 
 
     const row =
@@ -940,9 +934,9 @@ const requirements =
         ${escapeHtml(req.title)}
       </div>
 
-      <div class="requirement-state">
-        ${escapeHtml(state)}
-      </div>
+      <div class="requirement-state ${stateClass}">
+  ${escapeHtml(state)}
+</div>
     `;
 
 

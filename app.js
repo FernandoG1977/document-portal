@@ -510,16 +510,21 @@ sb.auth.onAuthStateChange(
     setTimeout(() => {
 
       if (event === "PASSWORD_RECOVERY") {
-
         recoveryMode = true;
-
         showRecoveryForm();
-
         return;
       }
 
+      if (recoveryMode) {
+        return;
+      }
 
-      if (!recoveryMode) {
+      if (event === "SIGNED_OUT") {
+        showForSession(null);
+        return;
+      }
+
+      if (session) {
         showForSession(session);
       }
 
@@ -548,24 +553,33 @@ $("loginForm")?.addEventListener(
       "status";
 
 
-    const { error } =
-      await sb.auth.signInWithPassword({
+    const { data, error } =
+  await sb.auth.signInWithPassword({
 
-        email:
-          $("email").value.trim(),
+    email:
+      $("email").value.trim(),
 
-        password:
-          $("password").value
-      });
+    password:
+      $("password").value
+  });
 
 
-    if (error) {
+if (error) {
 
-      status.textContent =
-        "Correo o contraseña incorrectos.";
+  status.textContent =
+    "Correo o contraseña incorrectos.";
 
-      status.classList.add("error");
-    }
+  status.classList.add("error");
+
+  return;
+}
+
+if (data?.session) {
+
+  status.textContent = "";
+
+  await showForSession(data.session);
+}
   }
 );
 

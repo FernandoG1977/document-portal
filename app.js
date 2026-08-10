@@ -452,7 +452,6 @@ $("userEmail").textContent =
   session.user.email;
 
 await loadRequirements(profile);
-await ;
 
   } else {
 

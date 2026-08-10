@@ -1,4 +1,402 @@
-import{createClient}from"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";import{SUPABASE_URL,SUPABASE_ANON_KEY,BUCKET}from"./config.js";const sb=createClient(SUPABASE_URL,SUPABASE_ANON_KEY),$=id=>document.getElementById(id);let docs=[];const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));const fmt=v=>new Intl.DateTimeFormat("es-MX",{dateStyle:"short",timeStyle:"short"}).format(new Date(v));
-async function admin(id){let{data}=await sb.from("profiles").select("role").eq("id",id).single();return data?.role==="admin"}async function view(s){if(!s){$("adminLogin").classList.remove("hidden");$("adminView").classList.add("hidden");return}if(!(await admin(s.user.id))){$("loginStatus").textContent="Esta cuenta no es administrador.";await sb.auth.signOut();return}$("adminLogin").classList.add("hidden");$("adminView").classList.remove("hidden");$("logoutBtn").classList.remove("hidden");$("adminEmail").textContent=s.user.email;await load()}
-const{data:{session}}=await sb.auth.getSession();await view(session);sb.auth.onAuthStateChange((_e,s)=>setTimeout(()=>view(s),0));$("loginForm").onsubmit=async e=>{e.preventDefault();let{error}=await sb.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});if(error)$("loginStatus").textContent="Correo o contraseña incorrectos."};$("logoutBtn").onclick=()=>sb.auth.signOut();
-async function load(){let{data,error}=await sb.from("documents").select("*").order("created_at",{ascending:false});if(!error){docs=data;render()}}function render(){let q=$("search").value.toLowerCase(),a=docs.filter(d=>[d.client_name,d.reference,d.document_type,d.original_name,d.user_email].join(" ").toLowerCase().includes(q));$("rows").innerHTML="";$("empty").style.display=a.length?"none":"block";a.forEach(d=>{let tr=document.createElement("tr");tr.innerHTML=`<td>${fmt(d.created_at)}</td><td>${esc(d.client_name)}</td><td>${esc(d.reference)}</td><td>${esc(d.document_type)}</td><td>${esc(d.original_name)}</td><td>${esc(d.user_email)}</td><td><a href="#" class="action-link open">Abrir</a> <button class="delete-btn">Eliminar</button></td>`;tr.querySelector(".open").onclick=async e=>{e.preventDefault();let{data:s}=await sb.storage.from(BUCKET).createSignedUrl(d.file_path,60);if(s)window.open(s.signedUrl,"_blank")};tr.querySelector(".delete-btn").onclick=async()=>{if(!confirm("¿Eliminar documento?"))return;await sb.storage.from(BUCKET).remove([d.file_path]);await sb.from("documents").delete().eq("id",d.id);await load()};$("rows").appendChild(tr)})}$("search").oninput=render;
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+import { SUPABASE_URL, SUPABASE_ANON_KEY, BUCKET } from "./config.js";
+
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = id => document.getElementById(id);
+
+let docs = [];
+
+const esc = s =>
+  String(s ?? "").replace(/[&<>"']/g, m => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  }[m]));
+
+const fmt = value =>
+  value
+    ? new Intl.DateTimeFormat("es-MX", {
+        dateStyle: "short",
+        timeStyle: "short"
+      }).format(new Date(value))
+    : "—";
+
+function statusLabel(status) {
+  if (status === "approved") return "Aprobado";
+  if (status === "rejected") return "Rechazado";
+  return "Pendiente";
+}
+
+async function isAdmin(userId) {
+  const { data, error } = await sb
+    .from("profiles")
+    .select("role")
+    .eq("id", userId)
+    .single();
+
+  return !error && data?.role === "admin";
+}
+
+async function showView(session) {
+  if (!session) {
+    $("adminLogin").classList.remove("hidden");
+    $("adminView").classList.add("hidden");
+    $("logoutBtn").classList.add("hidden");
+    $("adminEmail").textContent = "";
+    return;
+  }
+
+  const allowed = await isAdmin(session.user.id);
+
+  if (!allowed) {
+    $("loginStatus").textContent =
+      "Esta cuenta no tiene permisos de administrador.";
+
+    $("loginStatus").className = "status error";
+
+    await sb.auth.signOut();
+    return;
+  }
+
+  $("adminLogin").classList.add("hidden");
+  $("adminView").classList.remove("hidden");
+  $("logoutBtn").classList.remove("hidden");
+  $("adminEmail").textContent = session.user.email;
+
+  await loadDocuments();
+}
+
+const {
+  data: { session }
+} = await sb.auth.getSession();
+
+await showView(session);
+
+sb.auth.onAuthStateChange((_event, session) => {
+  setTimeout(() => showView(session), 0);
+});
+
+$("loginForm").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  $("loginStatus").textContent = "Entrando...";
+  $("loginStatus").className = "status";
+
+  const { error } = await sb.auth.signInWithPassword({
+    email: $("email").value.trim(),
+    password: $("password").value
+  });
+
+  if (error) {
+    $("loginStatus").textContent =
+      "Correo o contraseña incorrectos.";
+
+    $("loginStatus").className =
+      "status error";
+  }
+});
+
+$("logoutBtn").addEventListener("click", async () => {
+  await sb.auth.signOut();
+});
+
+async function loadDocuments() {
+  const { data, error } = await sb
+    .from("documents")
+    .select("*")
+    .order("created_at", {
+      ascending: false
+    });
+
+  if (error) {
+    console.error("Error al cargar documentos:", error);
+    return;
+  }
+
+  docs = data || [];
+
+  render();
+}
+
+function render() {
+  const q =
+    $("search").value
+      .trim()
+      .toLowerCase();
+
+  const filtered = docs.filter(d =>
+    [
+      d.client_name,
+      d.reference,
+      d.requirement_code,
+      d.document_type,
+      d.original_name,
+      d.user_email,
+      d.status,
+      d.review_comments
+    ]
+      .join(" ")
+      .toLowerCase()
+      .includes(q)
+  );
+
+  $("rows").innerHTML = "";
+
+  $("empty").style.display =
+    filtered.length
+      ? "none"
+      : "block";
+
+  filtered.forEach(d => {
+    const tr =
+      document.createElement("tr");
+
+    const requirement =
+      d.requirement_code ||
+      d.document_type ||
+      "—";
+
+    const comments =
+      d.review_comments
+        ? esc(d.review_comments)
+        : "—";
+
+    const reviewInfo =
+      d.reviewed_at
+        ? `${comments}<br><small>${fmt(d.reviewed_at)}</small>`
+        : comments;
+
+    tr.innerHTML = `
+      <td>${fmt(d.created_at)}</td>
+
+      <td>${esc(d.client_name)}</td>
+
+      <td>${esc(d.reference)}</td>
+
+      <td>${esc(requirement)}</td>
+
+      <td>${esc(d.original_name)}</td>
+
+      <td>${esc(d.user_email)}</td>
+
+      <td>
+        <strong>${statusLabel(d.status)}</strong>
+      </td>
+
+      <td>
+        ${reviewInfo}
+      </td>
+
+      <td>
+        <a href="#" class="action-link open">
+          Abrir
+        </a>
+
+        <button
+          class="approve-btn"
+          type="button">
+          Aprobar
+        </button>
+
+        <button
+          class="reject-btn"
+          type="button">
+          Rechazar
+        </button>
+
+        <button
+          class="delete-btn"
+          type="button">
+          Eliminar
+        </button>
+      </td>
+    `;
+
+    tr
+      .querySelector(".open")
+      .addEventListener(
+        "click",
+        async e => {
+          e.preventDefault();
+
+          const {
+            data: signed,
+            error
+          } =
+            await sb.storage
+              .from(BUCKET)
+              .createSignedUrl(
+                d.file_path,
+                60
+              );
+
+          if (error) {
+            alert(
+              "No fue posible abrir el documento."
+            );
+            return;
+          }
+
+          window.open(
+            signed.signedUrl,
+            "_blank",
+            "noopener"
+          );
+        }
+      );
+
+    tr
+      .querySelector(".approve-btn")
+      .addEventListener(
+        "click",
+        async () => {
+          const ok = confirm(
+            `¿Aprobar el documento ${d.original_name}?`
+          );
+
+          if (!ok) return;
+
+          const {
+            data: { user }
+          } =
+            await sb.auth.getUser();
+
+          const {
+            error
+          } =
+            await sb
+              .from("documents")
+              .update({
+                status: "approved",
+                review_comments: null,
+                reviewed_by:
+                  user?.id || null,
+                reviewed_at:
+                  new Date().toISOString()
+              })
+              .eq("id", d.id);
+
+          if (error) {
+            alert(
+              "No fue posible aprobar el documento: " +
+              error.message
+            );
+            return;
+          }
+
+          await loadDocuments();
+        }
+      );
+
+    tr
+      .querySelector(".reject-btn")
+      .addEventListener(
+        "click",
+        async () => {
+          const reason = prompt(
+            "Indica el motivo del rechazo:"
+          );
+
+          if (reason === null) return;
+
+          const cleanReason =
+            reason.trim();
+
+          if (!cleanReason) {
+            alert(
+              "Debes indicar el motivo del rechazo."
+            );
+            return;
+          }
+
+          const {
+            data: { user }
+          } =
+            await sb.auth.getUser();
+
+          const {
+            error
+          } =
+            await sb
+              .from("documents")
+              .update({
+                status: "rejected",
+                review_comments:
+                  cleanReason,
+                reviewed_by:
+                  user?.id || null,
+                reviewed_at:
+                  new Date().toISOString()
+              })
+              .eq("id", d.id);
+
+          if (error) {
+            alert(
+              "No fue posible rechazar el documento: " +
+              error.message
+            );
+            return;
+          }
+
+          await loadDocuments();
+        }
+      );
+
+    tr
+      .querySelector(".delete-btn")
+      .addEventListener(
+        "click",
+        async () => {
+          const ok = confirm(
+            `¿Eliminar el documento ${d.original_name}?`
+          );
+
+          if (!ok) return;
+
+          const {
+            error: storageError
+          } =
+            await sb.storage
+              .from(BUCKET)
+              .remove([
+                d.file_path
+              ]);
+
+          if (storageError) {
+            alert(
+              "No fue posible eliminar el archivo: " +
+              storageError.message
+            );
+            return;
+          }
+
+          const {
+            error: dbError
+          } =
+            await sb
+              .from("documents")
+              .delete()
+              .eq("id", d.id);
+
+          if (dbError) {
+            alert(
+              "No fue posible eliminar el registro: " +
+              dbError.message
+            );
+            return;
+          }
+
+          await loadDocuments();
+        }
+      );
+
+    $("rows").appendChild(tr);
+  });
+}
+
+$("search").addEventListener(
+  "input",
+  render
+);

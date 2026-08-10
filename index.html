@@ -1,9 +1,279 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Portal de Documentos</title<link rel="stylesheet" href="styles.css?v=3"></head>
-<body><header class="topbar"><div><div class="brand">PORTAL DE DOCUMENTOS</div><div class="subtitle">Recepción de documentación de operaciones</div></div><div><span id="userEmail"></span> <button id="logoutBtn" class="secondary hidden">Cerrar sesión</button></div></header>
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Portal de Documentos</title>
+  <link rel="stylesheet" href="styles.css?v=3">
+</head>
+
+<body>
+
+<header class="topbar">
+  <div>
+    <div class="brand">PORTAL DE DOCUMENTOS</div>
+    <div class="subtitle">Recepción de documentación de operaciones</div>
+  </div>
+
+  <div>
+    <span id="userEmail"></span>
+    <button id="logoutBtn" class="secondary hidden">
+      Cerrar sesión
+    </button>
+  </div>
+</header>
+
 <main class="container">
-<section id="loginView" class="auth-wrap"><div class="card auth-card"><p class="eyebrow">Acceso de clientes</p><h1>Iniciar sesión</h1><p class="muted">Ingresa con tu correo y contraseña.</p><form id="loginForm"><label>Correo<input type="email" id="email" required></label><label>Contraseña<input type="password" id="password" required></label><button type="submit">Entrar</button><div id="loginStatus" class="status"></div></form></div></section>
-<section id="portalView" class="hidden"><section class="hero"><p class="eyebrow">Carga segura y organizada</p><h1>Envía los documentos de tu operación</h1><p>Captura la referencia y adjunta uno o varios archivos.</p></section>
-<section class="card"><form id="uploadForm"><div class="grid"><label>Cliente / Empresa *<input id="clientName" name="client_name" required></label><label>Referencia / Operación *<input name="reference" required></label><label>Requisito documental<select id="requirementCode" name="requirement_code" required><option value="">Selecciona un requisito</option></select></label>
-<label class="dropzone"><input id="documents" type="file" multiple accept=".pdf,.xml,.xlsx,.xls,.docx,.doc,.jpg,.jpeg,.png"><span class="drop-title">Seleccionar documentos</span><span class="drop-sub">PDF, XML, Excel, Word, JPG o PNG</span></label><div id="fileList" class="file-list"></div><button id="submitBtn" type="submit">Subir documentos</button><div id="uploadStatus" class="status"></div></form></section>
-<section class="card" style="margin-top:24px"><div class="section-title"><div><p class="eyebrow">Mi expediente</p><h2>Mis documentos recientes</h2></div><button id="refreshBtn">Actualizar</button></div><div id="expedientSummary" class="expedient-summary"><div class="summary-item"><strong id="totalRequirements">0</strong><span>Requisitos</span></div><div class="summary-item"><strong id="approvedRequirements">0</strong><span>Aprobados</span></div><div class="summary-item"><strong id="pendingRequirements">0</strong><span>Pendientes</span></div><div class="summary-item"><strong id="rejectedRequirements">0</strong><span>Rechazados</span></div><div class="summary-item"><strong id="missingRequirements">0</strong><span>Faltantes</span></div></div><div id="requirementsChecklist"></div><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Referencia</th><th>Requisito</th><th>Archivo</th><th>Estado</th><th>Observaciones</th><th>Acción</th></tr></thead><tbody id="myRows"></tbody></table></div><div id="myEmpty" class="empty">No hay documentos cargados.</div></section>
-</section></main><script type="module" src="app.js?v=5"></script></body></html>
+
+  <section id="loginView" class="auth-wrap">
+    <div class="card auth-card">
+
+      <p class="eyebrow">Acceso de clientes</p>
+      <h1>Iniciar sesión</h1>
+      <p class="muted">
+        Ingresa con tu correo y contraseña.
+      </p>
+
+      <form id="loginForm">
+
+        <label>
+          Correo
+          <input
+            type="email"
+            id="email"
+            required
+          >
+        </label>
+
+        <label>
+          Contraseña
+          <input
+            type="password"
+            id="password"
+            required
+          >
+        </label>
+
+        <button type="submit">
+          Entrar
+        </button>
+
+        <div
+          id="loginStatus"
+          class="status">
+        </div>
+
+      </form>
+    </div>
+  </section>
+
+
+  <section
+    id="portalView"
+    class="hidden">
+
+    <section class="hero">
+
+      <p class="eyebrow">
+        Carga segura y organizada
+      </p>
+
+      <h1>
+        Envía los documentos de tu operación
+      </h1>
+
+      <p>
+        Captura la referencia y adjunta uno o varios archivos.
+      </p>
+
+    </section>
+
+
+    <section class="card">
+
+      <form id="uploadForm">
+
+        <div class="grid">
+
+          <label>
+            Cliente / Empresa *
+            <input
+              id="clientName"
+              name="client_name"
+              required
+            >
+          </label>
+
+          <label>
+            Referencia / Operación *
+            <input
+              name="reference"
+              required
+            >
+          </label>
+
+          <label>
+            Requisito documental
+
+            <select
+              id="requirementCode"
+              name="requirement_code"
+              required>
+
+              <option value="">
+                Selecciona un requisito
+              </option>
+
+            </select>
+          </label>
+
+
+          <label class="dropzone">
+
+            <input
+              id="documents"
+              type="file"
+              multiple
+              accept=".pdf,.xml,.xlsx,.xls,.docx,.doc,.jpg,.jpeg,.png"
+            >
+
+            <span class="drop-title">
+              Seleccionar documentos
+            </span>
+
+            <span class="drop-sub">
+              PDF, XML, Excel, Word, JPG o PNG
+            </span>
+
+          </label>
+
+
+          <div
+            id="fileList"
+            class="file-list">
+          </div>
+
+
+          <button
+            id="submitBtn"
+            type="submit">
+
+            Subir documentos
+
+          </button>
+
+
+          <div
+            id="uploadStatus"
+            class="status">
+          </div>
+
+        </div>
+
+      </form>
+
+    </section>
+
+
+    <section
+      class="card"
+      style="margin-top:24px">
+
+      <div class="section-title">
+
+        <div>
+          <p class="eyebrow">
+            Mi expediente
+          </p>
+
+          <h2>
+            Mis documentos recientes
+          </h2>
+        </div>
+
+        <button id="refreshBtn">
+          Actualizar
+        </button>
+
+      </div>
+
+
+      <div
+        id="expedientSummary"
+        class="expedient-summary">
+
+        <div class="summary-item">
+          <strong id="totalRequirements">0</strong>
+          <span>Requisitos</span>
+        </div>
+
+        <div class="summary-item">
+          <strong id="approvedRequirements">0</strong>
+          <span>Aprobados</span>
+        </div>
+
+        <div class="summary-item">
+          <strong id="pendingRequirements">0</strong>
+          <span>Pendientes</span>
+        </div>
+
+        <div class="summary-item">
+          <strong id="rejectedRequirements">0</strong>
+          <span>Rechazados</span>
+        </div>
+
+        <div class="summary-item">
+          <strong id="missingRequirements">0</strong>
+          <span>Faltantes</span>
+        </div>
+
+      </div>
+
+
+      <div id="requirementsChecklist"></div>
+
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Referencia</th>
+              <th>Requisito</th>
+              <th>Archivo</th>
+              <th>Estado</th>
+              <th>Observaciones</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+
+          <tbody id="myRows"></tbody>
+
+        </table>
+
+      </div>
+
+
+      <div
+        id="myEmpty"
+        class="empty">
+
+        No hay documentos cargados.
+
+      </div>
+
+    </section>
+
+  </section>
+
+</main>
+
+<script
+  type="module"
+  src="app.js?v=5">
+</script>
+
+</body>
+</html>

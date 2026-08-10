@@ -869,6 +869,7 @@ const requirements =
 
   let approvedCount = 0;
   let pendingCount = 0;
+  let rejectedCount = 0;
   let missingCount = 0;
 
 
@@ -898,17 +899,16 @@ if (documentForRequirement) {
 
   } else if (documentForRequirement.status === "rejected") {
 
-    state = "Rechazado";
-    stateClass = "state-rejected";
-    pendingCount++;
+  state = "Rechazado";
+  stateClass = "state-rejected";
+  rejectedCount++;
 
-  } else {
+} else {
 
-    state = "Pendiente de revisión";
-    stateClass = "state-pending";
-    pendingCount++;
-  }
-
+  state = "Pendiente de revisión";
+  stateClass = "state-pending";
+  pendingCount++;
+}
 } else {
 
   missingCount++;
@@ -1024,17 +1024,20 @@ if (
   );
 }
 
-  $("totalRequirements").textContent =
-    requirements.length;
+ $("totalRequirements").textContent =
+requirements.length;
 
-  $("approvedRequirements").textContent =
-    approvedCount;
+$("approvedRequirements").textContent =
+approvedCount;
 
-  $("pendingRequirements").textContent =
-    pendingCount;
+$("pendingRequirements").textContent =
+pendingCount;
 
-  $("missingRequirements").textContent =
-    missingCount;
+$("rejectedRequirements").textContent =
+rejectedCount;
+
+$("missingRequirements").textContent =
+missingCount;
 
 
   /* ================================================

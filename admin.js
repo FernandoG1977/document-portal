@@ -120,7 +120,27 @@ async function loadDocuments() {
 
   docs = data || [];
 
-  render();
+const clientFilter = $("adminClientFilter");
+
+if (clientFilter) {
+  const clients = [...new Set(
+    docs
+      .map(d => d.client_name)
+      .filter(Boolean)
+  )].sort();
+
+  clientFilter.innerHTML =
+    '<option value="">Selecciona un cliente</option>';
+
+  clients.forEach(client => {
+    const option = document.createElement("option");
+    option.value = client;
+    option.textContent = client;
+    clientFilter.appendChild(option);
+  });
+}
+
+render();
 }
 
 function render() {

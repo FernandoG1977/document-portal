@@ -984,46 +984,8 @@ if (
 
 $("requirementsChecklist")
   .appendChild(row);
+
   });
-const requirementOpen =
-  row.querySelector(".requirement-open");
-
-if (
-  requirementOpen &&
-  documentForRequirement
-) {
-
-  requirementOpen.addEventListener(
-    "click",
-    async e => {
-
-      e.preventDefault();
-
-      const {
-        data: signed,
-        error: signedError
-      } =
-        await sb.storage
-          .from(BUCKET)
-          .createSignedUrl(
-            documentForRequirement.file_path,
-            60
-          );
-
-      if (signedError || !signed) {
-        alert(
-          "No fue posible abrir el documento."
-        );
-        return;
-      }
-
-      window.open(
-        signed.signedUrl,
-        "_blank"
-      );
-    }
-  );
-}
 
  $("totalRequirements").textContent =
 requirements.length;

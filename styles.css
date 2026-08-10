@@ -539,3 +539,39 @@ th{
     padding-left:84px;
   }
 }
+/* ===== Estados del expediente ===== */
+
+.requirement-state{
+  display:inline-block;
+  justify-self:end;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+  text-align:center;
+  white-space:nowrap;
+}
+
+.state-approved{
+  color:#17663e;
+  background:#e7f6ed;
+  border:1px solid #b9dfc8;
+}
+
+.state-pending{
+  color:#8a5a00;
+  background:#fff5d9;
+  border:1px solid #efd58c;
+}
+
+.state-rejected{
+  color:#9b2525;
+  background:#fff0f0;
+  border:1px solid #efbcbc;
+}
+
+.state-missing{
+  color:#667085;
+  background:#f3f5f7;
+  border:1px solid #d9dee5;
+}

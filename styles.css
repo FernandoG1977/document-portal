@@ -450,3 +450,92 @@ th{
 #adminView .table-wrap{
   overflow-x:auto;
 }
+/* =====================================================
+   RESUMEN DEL EXPEDIENTE
+===================================================== */
+
+.expedient-summary{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  margin:20px 0 24px;
+}
+
+.summary-item{
+  background:#f6f8fb;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:16px;
+  text-align:center;
+}
+
+.summary-item strong{
+  display:block;
+  font-size:28px;
+  color:var(--accent2);
+  margin-bottom:4px;
+}
+
+.summary-item span{
+  display:block;
+  font-size:13px;
+  color:var(--muted);
+  font-weight:700;
+}
+
+/* =====================================================
+   LISTA DE REQUISITOS
+===================================================== */
+
+#requirementsChecklist{
+  border:1px solid var(--line);
+  border-radius:12px;
+  overflow:hidden;
+  margin-bottom:28px;
+}
+
+.requirement-row{
+  display:grid;
+  grid-template-columns:90px 1fr 170px;
+  gap:14px;
+  align-items:center;
+  padding:13px 16px;
+  border-bottom:1px solid var(--line);
+  background:#fff;
+}
+
+.requirement-row:last-child{
+  border-bottom:0;
+}
+
+.requirement-code{
+  color:var(--accent);
+  font-weight:800;
+}
+
+.requirement-state{
+  font-weight:800;
+  text-align:right;
+  color:var(--muted);
+}
+
+/* =====================================================
+   RESPONSIVE EXPEDIENTE
+===================================================== */
+
+@media(max-width:760px){
+
+  .expedient-summary{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .requirement-row{
+    grid-template-columns:70px 1fr;
+  }
+
+  .requirement-state{
+    grid-column:1 / -1;
+    text-align:left;
+    padding-left:84px;
+  }
+}

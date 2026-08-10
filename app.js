@@ -814,9 +814,7 @@ async function loadMine() {
       )
       .limit(100);
 
-
   $("myRows").innerHTML = "";
-
 
   if (
     error ||
@@ -830,74 +828,91 @@ async function loadMine() {
     return;
   }
 
-
   $("myEmpty").style.display =
     "none";
-
 
   data.forEach(item => {
 
     const tr =
       document.createElement("tr");
 
-
     const requirement =
-  item.requirement_code ||
-  item.document_type ||
-  "—";
+      item.requirement_code ||
+      item.document_type ||
+      "—";
 
-const status =
-  item.status === "approved"
-    ? "Aprobado"
-    : item.status === "rejected"
-      ? "Rechazado"
-      : "Pendiente";
+    const status =
+      item.status === "approved"
+        ? "Aprobado"
+        : item.status === "rejected"
+          ? "Rechazado"
+          : "Pendiente";
 
-const observations =
-  item.review_comments || "—";
+    const observations =
+      item.review_comments || "—";
 
-tr.innerHTML = `
-  <td>
-    ${formatDate(item.created_at)}
-  </td>
+    const replaceButton =
+      item.status === "rejected"
+        ? `
+          <button
+            type="button"
+            class="replace-btn">
+            Reemplazar
+          </button>
+        `
+        : "";
 
-  <td>
-    ${escapeHtml(item.reference)}
-  </td>
+    tr.innerHTML = `
+      <td>
+        ${formatDate(item.created_at)}
+      </td>
 
-  <td>
-    ${escapeHtml(requirement)}
-  </td>
+      <td>
+        ${escapeHtml(item.reference)}
+      </td>
 
-  <td>
-    ${escapeHtml(item.original_name)}
-  </td>
+      <td>
+        ${escapeHtml(requirement)}
+      </td>
 
-  <td>
-    <strong>${escapeHtml(status)}</strong>
-  </td>
+      <td>
+        ${escapeHtml(item.original_name)}
+      </td>
 
-  <td>
-    ${escapeHtml(observations)}
-  </td>
+      <td>
+        <strong>
+          ${escapeHtml(status)}
+        </strong>
+      </td>
 
-  <td>
-    <a
-      href="#"
-      class="action-link">
-      Abrir
-    </a>
-  </td>
-`;
+      <td>
+        ${escapeHtml(observations)}
+      </td>
 
+      <td>
+        <a
+          href="#"
+          class="action-link open-link">
+          Abrir
+        </a>
 
-    tr.querySelector("a")
+        ${replaceButton}
+
+        <input
+          type="file"
+          class="replace-file hidden"
+          accept=".pdf,.xml,.xlsx,.xls,.docx,.doc,.jpg,.jpeg,.png"
+        >
+      </td>
+    `;
+
+    tr
+      .querySelector(".open-link")
       .addEventListener(
         "click",
         async e => {
 
           e.preventDefault();
-
 
           const {
             data: signed
@@ -909,7 +924,6 @@ tr.innerHTML = `
                 60
               );
 
-
           if (signed) {
 
             window.open(
@@ -920,12 +934,129 @@ tr.innerHTML = `
         }
       );
 
+    const replaceBtn =
+      tr.querySelector(".replace-btn");
+
+    const replaceInput =
+      tr.querySelector(".replace-file");
+
+    if (
+      replaceBtn &&
+      replaceInput
+    ) {
+
+      replaceBtn.addEventListener(
+        "click",
+        () => {
+
+          replaceInput.click();
+        }
+      );
+
+      replaceInput.addEventListener(
+        "change",
+        async () => {
+
+          const file =
+            replaceInput.files?.[0];
+
+          if (!file) return;
+
+          const ok =
+            confirm(
+              `¿Reemplazar ${item.original_name} por ${file.name}?`
+            );
+
+          if (!ok) {
+
+            replaceInput.value = "";
+            return;
+          }
+
+          replaceBtn.disabled = true;
+          replaceBtn.textContent =
+            "Reemplazando...";
+
+          const {
+            error: uploadError
+          } =
+            await sb.storage
+              .from(BUCKET)
+              .upload(
+                item.file_path,
+                file,
+                {
+                  upsert: true,
+                  contentType:
+                    file.type ||
+                    "application/octet-stream"
+                }
+              );
+
+          if (uploadError) {
+
+            alert(
+              "No fue posible reemplazar el archivo: " +
+              uploadError.message
+            );
+
+            replaceBtn.disabled = false;
+            replaceBtn.textContent =
+              "Reemplazar";
+
+            return;
+          }
+
+          const {
+            error: updateError
+          } =
+            await sb
+              .from("documents")
+              .update({
+                original_name:
+                  file.name,
+                file_size:
+                  file.size,
+                mime_type:
+                  file.type ||
+                  null,
+                status:
+                  "pending",
+                review_comments:
+                  null,
+                reviewed_by:
+                  null,
+                reviewed_at:
+                  null
+              })
+              .eq(
+                "id",
+                item.id
+              );
+
+          if (updateError) {
+
+            alert(
+              "El archivo se reemplazó, pero no fue posible actualizar el estado: " +
+              updateError.message
+            );
+
+            return;
+          }
+
+          alert(
+            "Documento reemplazado correctamente. Quedó pendiente de revisión."
+          );
+
+          await loadMine();
+        }
+      );
+    }
 
     $("myRows")
       .appendChild(tr);
   });
 }
-
 
 $("refreshBtn")?.addEventListener(
   "click",

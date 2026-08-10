@@ -878,7 +878,16 @@ const requirements =
 
 
   requirements.forEach(req => {
-
+const openRequirementButton =
+  documentForRequirement
+    ? `
+      <a
+        href="#"
+        class="requirement-open">
+        Abrir
+      </a>
+    `
+    : "";
     const documentForRequirement =
       documents.find(
         doc =>
@@ -926,20 +935,66 @@ if (documentForRequirement) {
 
 
     row.innerHTML = `
-      <div class="requirement-code">
-        ${escapeHtml(req.code)}
-      </div>
+  <div class="requirement-code">
+    ${escapeHtml(req.code)}
+  </div>
 
-      <div>
-        ${escapeHtml(req.title)}
-      </div>
+  <div>
+    ${escapeHtml(req.title)}
+  </div>
 
-      <div class="requirement-state ${stateClass}">
-  ${escapeHtml(state)}
-</div>
-    `;
+  <div class="requirement-actions">
 
+    <span class="requirement-state ${stateClass}">
+      ${escapeHtml(state)}
+    </span>
 
+    ${openRequirementButton}
+
+  </div>
+`;
+
+const requirementOpen =
+  row.querySelector(".requirement-open");
+
+if (
+  requirementOpen &&
+  documentForRequirement
+) {
+
+  requirementOpen.addEventListener(
+    "click",
+    async e => {
+
+      e.preventDefault();
+
+      const {
+        data: signed,
+        error: signedError
+      } =
+        await sb.storage
+          .from(BUCKET)
+          .createSignedUrl(
+            documentForRequirement.file_path,
+            60
+          );
+
+      if (signedError || !signed) {
+
+        alert(
+          "No fue posible abrir el documento."
+        );
+
+        return;
+      }
+
+      window.open(
+        signed.signedUrl,
+        "_blank"
+      );
+    }
+  );
+}
     $("requirementsChecklist")
       .appendChild(row);
   });

@@ -728,12 +728,15 @@ $("uploadForm")?.addEventListener(
                   formData.get("reference")
                 ).trim(),
 
-              document_type:
-                String(
-                  formData.get("document_type")
-                ),
+              requirement_code:
+  String(
+    formData.get("requirement_code") || ""
+  ).trim(),
 
-              comments:
+document_type:
+  "Requisito documental",
+
+comments:
                 String(
                   formData.get("comments") || ""
                 ),
@@ -800,6 +803,171 @@ $("uploadForm")?.addEventListener(
 async function loadMine() {
 
   const {
+    data: { user }
+  } = await sb.auth.getUser();
+
+  if (!user) return;
+
+
+  /* ================================================
+     PERFIL DEL CLIENTE
+     ================================================ */
+
+  const {
+    data: profile,
+    error: profileError
+  } =
+    await sb
+      .from("profiles")
+      .select(`
+        person_type,
+        operation_type,
+        process_type,
+        has_sector_registry,
+        has_immex,
+        has_prosec,
+        is_certified_company
+      `)
+      .eq("id", user.id)
+      .single();
+
+
+  if (profileError || !profile) {
+
+    console.error(
+      "Error al cargar perfil:",
+      profileError
+    );
+
+    return;
+  }
+
+
+  /* ================================================
+     REGLAS APLICABLES
+     ================================================ */
+
+  const {
+    data: rules,
+    error: rulesError
+  } =
+    await sb
+      .from("requirement_rules")
+      .select(`
+        requirement_code,
+        requirement_level
+      `)
+      .eq(
+        "person_type",
+        profile.person_type
+      )
+      .eq(
+        "operation_type",
+        profile.operation_type
+      )
+      .eq(
+        "process_type",
+        profile.process_type
+      );
+
+
+  if (rulesError) {
+
+    console.error(
+      "Error al cargar reglas:",
+      rulesError
+    );
+
+    return;
+  }
+
+
+  const applicableRules =
+    (rules || []).filter(rule => {
+
+      if (
+        rule.requirement_code === "REQ-12"
+      ) {
+        return (
+          profile.has_sector_registry === true
+        );
+      }
+
+
+      if (
+        rule.requirement_code === "REQ-15"
+      ) {
+        return (
+          profile.has_immex === true ||
+          profile.has_prosec === true ||
+          profile.is_certified_company === true
+        );
+      }
+
+
+      return (
+        rule.requirement_level !==
+        "not_applicable"
+      );
+    });
+
+
+  const codes =
+    applicableRules.map(
+      rule => rule.requirement_code
+    );
+
+
+  /* ================================================
+     NOMBRES DE LOS REQUISITOS
+     ================================================ */
+
+  let requirements = [];
+
+
+  if (codes.length) {
+
+    const {
+      data: requirementData,
+      error: requirementError
+    } =
+      await sb
+        .from("document_requirements")
+        .select(`
+          code,
+          title,
+          sort_order
+        `)
+        .in("code", codes)
+        .order(
+          "sort_order",
+          {
+            ascending: true
+          }
+        );
+
+
+    if (requirementError) {
+
+      console.error(
+        "Error al cargar requisitos:",
+        requirementError
+      );
+
+      return;
+    }
+
+
+    requirements =
+      requirementData || [];
+  }
+
+
+  /* ================================================
+     DOCUMENTOS DEL CLIENTE
+     ================================================ */
+
+  const {
     data,
     error
   } =
@@ -814,13 +982,121 @@ async function loadMine() {
       )
       .limit(100);
 
+
+  const documents =
+    !error && data
+      ? data
+      : [];
+
+
+  /* ================================================
+     RESUMEN DEL EXPEDIENTE
+     ================================================ */
+
+  let approvedCount = 0;
+  let pendingCount = 0;
+  let missingCount = 0;
+
+
+  $("requirementsChecklist").innerHTML =
+    "";
+
+
+  requirements.forEach(req => {
+
+    const documentForRequirement =
+      documents.find(
+        doc =>
+          doc.requirement_code ===
+          req.code
+      );
+
+
+    let state =
+      "Falta cargar";
+
+
+    if (documentForRequirement) {
+
+      if (
+        documentForRequirement.status ===
+        "approved"
+      ) {
+
+        state = "Aprobado";
+        approvedCount++;
+
+      } else if (
+        documentForRequirement.status ===
+        "rejected"
+      ) {
+
+        state = "Rechazado";
+        pendingCount++;
+
+      } else {
+
+        state =
+          "Pendiente de revisión";
+
+        pendingCount++;
+      }
+
+    } else {
+
+      missingCount++;
+    }
+
+
+    const row =
+      document.createElement("div");
+
+
+    row.className =
+      "requirement-row";
+
+
+    row.innerHTML = `
+      <div class="requirement-code">
+        ${escapeHtml(req.code)}
+      </div>
+
+      <div>
+        ${escapeHtml(req.title)}
+      </div>
+
+      <div class="requirement-state">
+        ${escapeHtml(state)}
+      </div>
+    `;
+
+
+    $("requirementsChecklist")
+      .appendChild(row);
+  });
+
+
+  $("totalRequirements").textContent =
+    requirements.length;
+
+  $("approvedRequirements").textContent =
+    approvedCount;
+
+  $("pendingRequirements").textContent =
+    pendingCount;
+
+  $("missingRequirements").textContent =
+    missingCount;
+
+
+  /* ================================================
+     TABLA DE DOCUMENTOS
+     ================================================ */
+
   $("myRows").innerHTML = "";
 
-  if (
-    error ||
-    !data ||
-    !data.length
-  ) {
+
+  if (!documents.length) {
 
     $("myEmpty").style.display =
       "block";
@@ -828,18 +1104,22 @@ async function loadMine() {
     return;
   }
 
+
   $("myEmpty").style.display =
     "none";
 
-  data.forEach(item => {
+
+  documents.forEach(item => {
 
     const tr =
       document.createElement("tr");
+
 
     const requirement =
       item.requirement_code ||
       item.document_type ||
       "—";
+
 
     const status =
       item.status === "approved"
@@ -848,8 +1128,10 @@ async function loadMine() {
           ? "Rechazado"
           : "Pendiente";
 
+
     const observations =
       item.review_comments || "—";
+
 
     const replaceButton =
       item.status === "rejected"
@@ -861,6 +1143,7 @@ async function loadMine() {
           </button>
         `
         : "";
+
 
     tr.innerHTML = `
       <td>
@@ -906,6 +1189,7 @@ async function loadMine() {
       </td>
     `;
 
+
     tr
       .querySelector(".open-link")
       .addEventListener(
@@ -913,6 +1197,7 @@ async function loadMine() {
         async e => {
 
           e.preventDefault();
+
 
           const {
             data: signed
@@ -924,6 +1209,7 @@ async function loadMine() {
                 60
               );
 
+
           if (signed) {
 
             window.open(
@@ -934,11 +1220,18 @@ async function loadMine() {
         }
       );
 
+
     const replaceBtn =
-      tr.querySelector(".replace-btn");
+      tr.querySelector(
+        ".replace-btn"
+      );
+
 
     const replaceInput =
-      tr.querySelector(".replace-file");
+      tr.querySelector(
+        ".replace-file"
+      );
+
 
     if (
       replaceBtn &&
@@ -953,6 +1246,7 @@ async function loadMine() {
         }
       );
 
+
       replaceInput.addEventListener(
         "change",
         async () => {
@@ -960,22 +1254,29 @@ async function loadMine() {
           const file =
             replaceInput.files?.[0];
 
+
           if (!file) return;
+
 
           const ok =
             confirm(
               `¿Reemplazar ${item.original_name} por ${file.name}?`
             );
 
+
           if (!ok) {
 
             replaceInput.value = "";
+
             return;
           }
 
+
           replaceBtn.disabled = true;
+
           replaceBtn.textContent =
             "Reemplazando...";
+
 
           const {
             error: uploadError
@@ -987,11 +1288,13 @@ async function loadMine() {
                 file,
                 {
                   upsert: true,
+
                   contentType:
                     file.type ||
                     "application/octet-stream"
                 }
               );
+
 
           if (uploadError) {
 
@@ -1000,12 +1303,16 @@ async function loadMine() {
               uploadError.message
             );
 
+
             replaceBtn.disabled = false;
+
             replaceBtn.textContent =
               "Reemplazar";
 
+
             return;
           }
+
 
           const {
             error: updateError
@@ -1013,19 +1320,26 @@ async function loadMine() {
             await sb
               .from("documents")
               .update({
+
                 original_name:
                   file.name,
+
                 file_size:
                   file.size,
+
                 mime_type:
                   file.type ||
                   null,
+
                 status:
                   "pending",
+
                 review_comments:
                   null,
+
                 reviewed_by:
                   null,
+
                 reviewed_at:
                   null
               })
@@ -1033,6 +1347,7 @@ async function loadMine() {
                 "id",
                 item.id
               );
+
 
           if (updateError) {
 
@@ -1044,14 +1359,17 @@ async function loadMine() {
             return;
           }
 
+
           alert(
             "Documento reemplazado correctamente. Quedó pendiente de revisión."
           );
+
 
           await loadMine();
         }
       );
     }
+
 
     $("myRows")
       .appendChild(tr);

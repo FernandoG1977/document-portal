@@ -25,10 +25,34 @@ const safeFileName = name =>
   name
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-zA-Z0-9._-]/g, "_");
+   .replace(/[^a-zA-Z0-9._-]/g, "_");
 
+async function loadRequirements() {
+  const select = $("requirementCode");
 
-/* ======================================================
+  if (!select) return;
+
+  select.innerHTML = '<option value="">Selecciona un requisito</option>';
+
+  const { data, error } = await sb
+    .from("document_requirements")
+    .select("code, title, category, sort_order")
+    .order("sort_order", { ascending: true });
+
+  if (error) {
+    console.error("Error al cargar requisitos:", error);
+    return;
+  }
+
+  data.forEach(item => {
+    const option = document.createElement("option");
+    option.value = item.code;
+    option.textContent = `${item.code} - ${item.title}`;
+    select.appendChild(option);
+  });
+}
+
+/* ================================================
    RECUPERACIÓN DE CONTRASEÑA
    ====================================================== */
 
@@ -359,7 +383,10 @@ if (!profileError && profile?.role === "client" && profile?.company) {
   $("clientName").value = profile.company;
   $("clientName").readOnly = true;
 }
+$("userEmail").textContent =
+  session.user.email;
 
+await loadRequirements();
 await loadMine();
 
   } else {

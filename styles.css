@@ -351,3 +351,110 @@ th{
     overflow-x:visible;
   }
 }
+/* ===== AJUSTE FINAL PANEL ADMINISTRATIVO ===== */
+
+#adminView table{
+  table-layout:fixed;
+  width:100%;
+  font-size:13px;
+}
+
+#adminView th,
+#adminView td{
+  padding:10px 7px;
+  vertical-align:top;
+  word-break:normal;
+  overflow-wrap:anywhere;
+}
+
+/* Fecha */
+#adminView th:nth-child(1),
+#adminView td:nth-child(1){
+  width:9%;
+}
+
+/* Cliente */
+#adminView th:nth-child(2),
+#adminView td:nth-child(2){
+  width:11%;
+}
+
+/* Referencia */
+#adminView th:nth-child(3),
+#adminView td:nth-child(3){
+  width:9%;
+}
+
+/* Requisito */
+#adminView th:nth-child(4),
+#adminView td:nth-child(4){
+  width:10%;
+}
+
+/* Archivo */
+#adminView th:nth-child(5),
+#adminView td:nth-child(5){
+  width:17%;
+}
+
+/* Usuario */
+#adminView th:nth-child(6),
+#adminView td:nth-child(6){
+  width:17%;
+}
+
+/* Estado */
+#adminView th:nth-child(7),
+#adminView td:nth-child(7){
+  width:8%;
+}
+
+/* Revisión */
+#adminView th:nth-child(8),
+#adminView td:nth-child(8){
+  width:7%;
+}
+
+/* Acciones */
+#adminView th:nth-child(9),
+#adminView td:nth-child(9){
+  width:12%;
+  min-width:90px;
+}
+
+#adminView .action-link{
+  display:block;
+  margin-bottom:6px;
+  white-space:nowrap;
+}
+
+#adminView .approve-btn,
+#adminView .reject-btn,
+#adminView .delete-btn{
+  display:block;
+  width:100%;
+  min-width:82px;
+  margin:5px 0;
+  padding:8px 6px;
+  font-size:12px;
+  white-space:nowrap;
+  text-align:center;
+}
+
+#adminView .approve-btn{
+  background:var(--ok);
+}
+
+#adminView .reject-btn{
+  background:var(--danger);
+}
+
+#adminView .delete-btn{
+  background:#fff1f1;
+  color:var(--danger);
+  border:1px solid #f0caca;
+}
+
+#adminView .table-wrap{
+  overflow-x:auto;
+}

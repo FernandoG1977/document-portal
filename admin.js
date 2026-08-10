@@ -51,14 +51,17 @@ async function showView(session) {
   const allowed = await isAdmin(session.user.id);
 
   if (!allowed) {
-    $("loginStatus").textContent =
-      "Esta cuenta no tiene permisos de administrador.";
+  $("adminLogin").classList.remove("hidden");
+  $("adminView").classList.add("hidden");
+  $("logoutBtn").classList.add("hidden");
 
-    $("loginStatus").className = "status error";
+  $("loginStatus").textContent =
+    "Esta cuenta no tiene permisos de administrador.";
 
-    await sb.auth.signOut();
-    return;
-  }
+  $("loginStatus").className = "status error";
+
+  return;
+}
 
   $("adminLogin").classList.add("hidden");
   $("adminView").classList.remove("hidden");

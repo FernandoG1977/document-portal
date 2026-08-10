@@ -452,8 +452,9 @@ $("userEmail").textContent =
   session.user.email;
 
 await loadRequirements(profile);
+await loadMine();
 
-  } else {
+} else {
 
     $("loginView").classList.remove("hidden");
 

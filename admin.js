@@ -980,7 +980,10 @@ adminTabs.forEach(tab => {
       });
 
       tab.classList.add("active");
-
+      
+if (target === "clientsSection") {
+  loadClientsAdmin();
+}
       adminSections.forEach(sectionId => {
 
         const section =
@@ -1000,3 +1003,90 @@ adminTabs.forEach(tab => {
   );
 
 });
+async function loadClientsAdmin() {
+
+  const clientsList =
+    $("clientsList");
+
+  if (!clientsList) return;
+
+  clientsList.innerHTML =
+    "Cargando clientes...";
+
+  const {
+    data: clients,
+    error
+  } =
+    await sb
+      .from("profiles")
+      .select(`
+        id,
+        email,
+        company,
+        person_type,
+        operation_type,
+        process_type,
+        has_sector_registry,
+        has_immex,
+        has_prosec,
+        is_certified_company
+      `)
+      .eq("role", "client")
+      .order("company", {
+        ascending: true
+      });
+
+  if (error) {
+
+    console.error(
+      "No fue posible cargar los clientes:",
+      error
+    );
+
+    clientsList.innerHTML =
+      "No fue posible cargar los clientes.";
+
+    return;
+  }
+
+  if (!clients?.length) {
+
+    clientsList.innerHTML =
+      "No hay clientes registrados.";
+
+    return;
+  }
+
+  clientsList.innerHTML = "";
+
+  clients.forEach(client => {
+
+    const row =
+      document.createElement("div");
+
+    row.className =
+      "client-admin-row";
+
+    row.innerHTML = `
+      <div>
+        <strong>
+          ${esc(client.company || "Sin empresa")}
+        </strong>
+
+        <div>
+          ${esc(client.email || "—")}
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="client-edit-btn">
+        Editar
+      </button>
+    `;
+
+    clientsList.appendChild(row);
+
+  });
+
+}

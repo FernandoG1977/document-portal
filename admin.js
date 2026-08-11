@@ -1118,13 +1118,11 @@ if (form) {
     client.is_certified_company === true;
 
   form.classList.remove("hidden");
-}
-      );
-
+      }
     }
   );
 
 }
-  });
 
+});
 }

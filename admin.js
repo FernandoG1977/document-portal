@@ -1128,3 +1128,81 @@ if (formWrap && form) {
 
 });
 }
+$("clientForm")?.addEventListener(
+  "submit",
+  async e => {
+
+    e.preventDefault();
+
+    const clientId =
+      $("clientId").value;
+
+    if (!clientId) {
+      alert("No se pudo identificar al cliente.");
+      return;
+    }
+
+    const changes = {
+      person_type:
+        $("clientPersonType").value,
+
+      operation_type:
+        $("clientOperationType").value,
+
+      process_type:
+        $("clientProcessType").value,
+
+      has_sector_registry:
+        $("clientSectorRegistry").checked,
+
+      has_immex:
+        $("clientImmex").checked,
+
+      has_prosec:
+        $("clientProsec").checked,
+
+      is_certified_company:
+        $("clientCertified").checked
+    };
+
+    const {
+      error
+    } =
+      await sb
+        .from("profiles")
+        .update(changes)
+        .eq("id", clientId);
+
+    if (error) {
+
+      console.error(
+        "No fue posible actualizar el cliente:",
+        error
+      );
+
+      alert(
+        "No fue posible guardar los cambios: " +
+        error.message
+      );
+
+      return;
+    }
+
+    alert("Cliente actualizado correctamente.");
+
+    $("clientFormWrap")
+      ?.classList.add("hidden");
+
+    await loadClientsAdmin();
+
+  }
+);
+$("cancelClientBtn")?.addEventListener(
+  "click",
+  () => {
+
+    $("clientFormWrap")
+      ?.classList.add("hidden");
+
+  }
+);

@@ -1096,11 +1096,13 @@ if (editButton) {
     "click",
     () => {
 
-      const form = $("clientForm");
+     const formWrap = $("clientFormWrap");
+const form = $("clientForm");
 
-if (form) {
+if (formWrap && form) {
   $("clientId").value = client.id || "";
   $("clientCompany").value = client.company || "";
+  $("clientEmail").value = client.email || "";
   $("clientPersonType").value = client.person_type || "";
   $("clientOperationType").value = client.operation_type || "";
   $("clientProcessType").value = client.process_type || "";
@@ -1117,7 +1119,7 @@ if (form) {
   $("clientCertified").checked =
     client.is_certified_company === true;
 
-  form.classList.remove("hidden");
+  formWrap.classList.remove("hidden");
       }
     }
   );

@@ -637,3 +637,67 @@ th{
     padding-left:84px;
   }
 }
+/* =========================================
+   EXPEDIENTE - TABLA ADMINISTRATIVA
+   ========================================= */
+
+.admin-requirement-header,
+.admin-requirement-row {
+  display: grid;
+  grid-template-columns: 3fr 2fr 1.3fr 1.6fr;
+  gap: 18px;
+  align-items: center;
+  padding: 14px 16px;
+}
+
+.admin-requirement-header {
+  margin-top: 18px;
+  background: #f5f7fa;
+  border-top: 1px solid #d7e0ea;
+  border-bottom: 1px solid #d7e0ea;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #53657a;
+}
+
+.admin-requirement-row {
+  border-bottom: 1px solid #d7e0ea;
+  min-height: 62px;
+}
+
+.admin-requirement-name {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.admin-requirement-name strong {
+  color: #00549b;
+  min-width: 62px;
+}
+
+.admin-requirement-name span {
+  line-height: 1.3;
+}
+
+.admin-requirement-document {
+  overflow-wrap: anywhere;
+  font-size: 14px;
+}
+
+.admin-requirement-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-requirement-actions .action-link {
+  font-weight: 700;
+  text-decoration: none;
+  color: #00549b;
+}
+
+.admin-requirement-actions .action-link:hover {
+  text-decoration: underline;
+}

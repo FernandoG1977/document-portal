@@ -140,11 +140,18 @@ if (clientFilter) {
     '<option value="">Selecciona un cliente</option>';
 
   clients.forEach(client => {
-    const option = document.createElement("option");
-    option.value = client;
-    option.textContent = client;
-    clientFilter.appendChild(option);
-  });
+  const option = document.createElement("option");
+  option.value = client;
+  option.textContent = client;
+  clientFilter.appendChild(option);
+});
+
+clientFilter.onchange = async e => {
+  await loadAdminExpedient(
+    e.target.value
+  );
+};
+
 }
 
 render();

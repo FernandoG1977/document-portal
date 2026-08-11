@@ -346,7 +346,58 @@ $("adminRejectedRequirements").textContent =
 $("adminMissingRequirements").textContent =
   missingCount;
 
-summary.classList.remove("hidden"); 
+summary.classList.remove("hidden");
+  checklist.innerHTML = "";
+
+requirements.forEach(req => {
+
+  const documentForRequirement =
+    clientDocuments.find(
+      d => d.requirement_code === req.code
+    );
+
+  let state = "Falta cargar";
+  let stateClass = "state-missing";
+
+  if (documentForRequirement) {
+
+    if (documentForRequirement.status === "approved") {
+      state = "Aprobado";
+      stateClass = "state-approved";
+
+    } else if (documentForRequirement.status === "rejected") {
+      state = "Rechazado";
+      stateClass = "state-rejected";
+
+    } else {
+      state = "Pendiente de revisión";
+      stateClass = "state-pending";
+    }
+  }
+
+  const row =
+    document.createElement("div");
+
+  row.className = "requirement-row";
+
+  row.innerHTML = `
+    <div class="requirement-code">
+      ${esc(req.code)}
+    </div>
+
+    <div>
+      ${esc(req.title)}
+    </div>
+
+    <span class="requirement-state ${stateClass}">
+      ${esc(state)}
+    </span>
+  `;
+
+  checklist.appendChild(row);
+});
+
+checklist.classList.remove("hidden");
 }
 function render() {
   const q =

@@ -1096,9 +1096,29 @@ if (editButton) {
     "click",
     () => {
 
-      console.log(
-        "EDITAR CLIENTE:",
-        client
+      const form = $("clientForm");
+
+if (form) {
+  $("clientId").value = client.id || "";
+  $("clientCompany").value = client.company || "";
+  $("clientPersonType").value = client.person_type || "";
+  $("clientOperationType").value = client.operation_type || "";
+  $("clientProcessType").value = client.process_type || "";
+
+  $("clientSectorRegistry").checked =
+    client.has_sector_registry === true;
+
+  $("clientImmex").checked =
+    client.has_immex === true;
+
+  $("clientProsec").checked =
+    client.has_prosec === true;
+
+  $("clientCertified").checked =
+    client.is_certified_company === true;
+
+  form.classList.remove("hidden");
+}
       );
 
     }

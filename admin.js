@@ -351,6 +351,20 @@ $("adminMissingRequirements").textContent =
 summary.classList.remove("hidden");
   checklist.innerHTML = "";
 
+const header =
+  document.createElement("div");
+
+header.className = "admin-requirement-header";
+
+header.innerHTML = `
+  <div>Requisito</div>
+  <div>Documento</div>
+  <div>Estado</div>
+  <div>Acción</div>
+`;
+
+checklist.appendChild(header);
+
 requirements.forEach(req => {
 
   const documentForRequirement =
@@ -372,7 +386,7 @@ requirements.forEach(req => {
       stateClass = "state-rejected";
 
     } else {
-      state = "Pendiente de revisión";
+      state = "Pendiente";
       stateClass = "state-pending";
     }
   }
@@ -380,21 +394,93 @@ requirements.forEach(req => {
   const row =
     document.createElement("div");
 
-  row.className = "requirement-row";
+  row.className =
+    "admin-requirement-row";
+
+  const documentName =
+    documentForRequirement
+      ? esc(documentForRequirement.original_name)
+      : "—";
+
+  const action =
+    documentForRequirement
+      ? `
+          <a
+            href="#"
+            class="action-link admin-requirement-open">
+            Abrir
+          </a>
+        `
+      : "—";
 
   row.innerHTML = `
-    <div class="requirement-code">
-      ${esc(req.code)}
+    <div class="admin-requirement-name">
+      <strong>${esc(req.code)}</strong>
+      <span>${esc(req.title)}</span>
+    </div>
+
+    <div class="admin-requirement-document">
+      ${documentName}
     </div>
 
     <div>
-      ${esc(req.title)}
+      <span class="requirement-state ${stateClass}">
+        ${esc(state)}
+      </span>
     </div>
 
-    <span class="requirement-state ${stateClass}">
-      ${esc(state)}
-    </span>
+    <div class="admin-requirement-actions">
+      ${action}
+    </div>
   `;
+
+  const openButton =
+    row.querySelector(
+      ".admin-requirement-open"
+    );
+
+  if (
+    openButton &&
+    documentForRequirement
+  ) {
+
+    openButton.addEventListener(
+      "click",
+      async e => {
+
+        e.preventDefault();
+
+        const {
+          data: signed,
+          error: signedError
+        } =
+          await sb.storage
+            .from(BUCKET)
+            .createSignedUrl(
+              documentForRequirement.file_path,
+              60
+            );
+
+        if (
+          signedError ||
+          !signed
+        ) {
+
+          alert(
+            "No fue posible abrir el documento."
+          );
+
+          return;
+        }
+
+        window.open(
+          signed.signedUrl,
+          "_blank",
+          "noopener"
+        );
+      }
+    );
+  }
 
   checklist.appendChild(row);
 });

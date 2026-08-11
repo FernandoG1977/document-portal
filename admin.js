@@ -150,6 +150,8 @@ clientFilter.onchange = async e => {
   await loadAdminExpedient(
     e.target.value
   );
+
+  render();
 };
 
 }
@@ -405,7 +407,16 @@ function render() {
       .trim()
       .toLowerCase();
 
-  const filtered = docs.filter(d =>
+  const selectedClient =
+  $("adminClientFilter")?.value || "";
+
+const filtered = docs.filter(d => {
+
+  const matchesClient =
+    !selectedClient ||
+    d.client_name === selectedClient;
+
+  const matchesSearch =
     [
       d.client_name,
       d.reference,
@@ -418,8 +429,10 @@ function render() {
     ]
       .join(" ")
       .toLowerCase()
-      .includes(q)
-  );
+      .includes(q);
+
+  return matchesClient && matchesSearch;
+});
 
   $("rows").innerHTML = "";
 

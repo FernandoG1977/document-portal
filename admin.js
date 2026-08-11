@@ -231,6 +231,81 @@ async function loadAdminExpedient(clientName) {
     "PERFIL ADMIN CLIENTE:",
     profile
   );
+  const {
+  data: rules,
+  error: rulesError
+} =
+  await sb
+    .from("requirement_rules")
+    .select(`
+      requirement_code,
+      requirement_level
+    `)
+    .eq("person_type", profile.person_type)
+    .eq("operation_type", profile.operation_type)
+    .eq("process_type", profile.process_type);
+
+if (rulesError) {
+  console.error(
+    "No fue posible cargar las reglas:",
+    rulesError
+  );
+  return;
+}
+
+const applicableRules =
+  (rules || []).filter(rule => {
+
+    if (rule.requirement_code === "REQ-12") {
+      return profile.has_sector_registry === true;
+    }
+
+    if (rule.requirement_code === "REQ-15") {
+      return (
+        profile.has_immex === true ||
+        profile.has_prosec === true ||
+        profile.is_certified_company === true
+      );
+    }
+
+    return (
+      rule.requirement_level !== "not_applicable"
+    );
+  });
+
+const codes =
+  applicableRules.map(
+    rule => rule.requirement_code
+  );
+
+const {
+  data: requirements,
+  error: requirementsError
+} =
+  await sb
+    .from("document_requirements")
+    .select(`
+      code,
+      title,
+      sort_order
+    `)
+    .in("code", codes)
+    .order("sort_order", {
+      ascending: true
+    });
+
+if (requirementsError) {
+  console.error(
+    "No fue posible cargar los requisitos:",
+    requirementsError
+  );
+  return;
+}
+
+console.log(
+  "REQUISITOS ADMIN:",
+  requirements
+);
 }
 function render() {
   const q =

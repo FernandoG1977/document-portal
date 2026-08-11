@@ -402,8 +402,9 @@ requirements.forEach(req => {
       ? esc(documentForRequirement.original_name)
       : "—";
 
-  const action =
-    documentForRequirement
+ const action =
+  documentForRequirement
+    ? documentForRequirement.status === "approved"
       ? `
           <a
             href="#"
@@ -411,7 +412,40 @@ requirements.forEach(req => {
             Abrir
           </a>
         `
-      : "—";
+      : documentForRequirement.status === "rejected"
+        ? `
+            <a
+              href="#"
+              class="action-link admin-requirement-open">
+              Abrir
+            </a>
+
+            <button
+              type="button"
+              class="approve-btn admin-requirement-approve">
+              Aprobar
+            </button>
+          `
+        : `
+            <a
+              href="#"
+              class="action-link admin-requirement-open">
+              Abrir
+            </a>
+
+            <button
+              type="button"
+              class="approve-btn admin-requirement-approve">
+              Aprobar
+            </button>
+
+            <button
+              type="button"
+              class="reject-btn admin-requirement-reject">
+              Rechazar
+            </button>
+          `
+    : "—";
 
   row.innerHTML = `
     <div class="admin-requirement-name">
@@ -481,7 +515,141 @@ requirements.forEach(req => {
       }
     );
   }
+const approveButton =
+  row.querySelector(
+    ".admin-requirement-approve"
+  );
 
+if (
+  approveButton &&
+  documentForRequirement
+) {
+
+  approveButton.addEventListener(
+    "click",
+    async () => {
+
+      const ok = confirm(
+        `¿Aprobar el documento ${documentForRequirement.original_name}?`
+      );
+
+      if (!ok) return;
+
+      const {
+        data: { user }
+      } =
+        await sb.auth.getUser();
+
+      const {
+        error
+      } =
+        await sb
+          .from("documents")
+          .update({
+            status: "approved",
+            review_comments: null,
+            reviewed_by:
+              user?.id || null,
+            reviewed_at:
+              new Date().toISOString()
+          })
+          .eq(
+            "id",
+            documentForRequirement.id
+          );
+
+      if (error) {
+        alert(
+          "No fue posible aprobar el documento: " +
+          error.message
+        );
+
+        return;
+      }
+
+      await loadDocuments();
+
+      await loadAdminExpedient(
+        $("adminClientFilter").value
+      );
+    }
+  );
+}
+
+const rejectButton =
+  row.querySelector(
+    ".admin-requirement-reject"
+  );
+
+if (
+  rejectButton &&
+  documentForRequirement
+) {
+
+  rejectButton.addEventListener(
+    "click",
+    async () => {
+
+      const reason = prompt(
+        "Indica el motivo del rechazo:"
+      );
+
+      if (reason === null) return;
+
+      const cleanReason =
+        reason.trim();
+
+      if (!cleanReason) {
+
+        alert(
+          "Debes indicar el motivo del rechazo."
+        );
+
+        return;
+      }
+
+      const {
+        data: { user }
+      } =
+        await sb.auth.getUser();
+
+      const {
+        error
+      } =
+        await sb
+          .from("documents")
+          .update({
+            status: "rejected",
+            review_comments:
+              cleanReason,
+            reviewed_by:
+              user?.id || null,
+            reviewed_at:
+              new Date().toISOString()
+          })
+          .eq(
+            "id",
+            documentForRequirement.id
+          );
+
+      if (error) {
+
+        alert(
+          "No fue posible rechazar el documento: " +
+          error.message
+        );
+
+        return;
+      }
+
+      await loadDocuments();
+
+      await loadAdminExpedient(
+        $("adminClientFilter").value
+      );
+    }
+  );
+}
   checklist.appendChild(row);
 });
 

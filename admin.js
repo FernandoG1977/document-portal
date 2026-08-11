@@ -1086,7 +1086,25 @@ async function loadClientsAdmin() {
     `;
 
     clientsList.appendChild(row);
+    
+const editButton =
+  row.querySelector(".client-edit-btn");
 
+if (editButton) {
+
+  editButton.addEventListener(
+    "click",
+    () => {
+
+      console.log(
+        "EDITAR CLIENTE:",
+        client
+      );
+
+    }
+  );
+
+}
   });
 
 }

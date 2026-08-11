@@ -956,3 +956,47 @@ $("adminClientFilter")?.addEventListener(
     );
   }
 );
+const adminTabs =
+  document.querySelectorAll(".admin-tab");
+
+const adminSections = [
+  "documentsSection",
+  "clientsSection",
+  "requirementsSection",
+  "formatsSection"
+];
+
+adminTabs.forEach(tab => {
+
+  tab.addEventListener(
+    "click",
+    () => {
+
+      const target =
+        tab.dataset.section;
+
+      adminTabs.forEach(item => {
+        item.classList.remove("active");
+      });
+
+      tab.classList.add("active");
+
+      adminSections.forEach(sectionId => {
+
+        const section =
+          document.getElementById(sectionId);
+
+        if (!section) return;
+
+        if (sectionId === target) {
+          section.classList.remove("hidden");
+        } else {
+          section.classList.add("hidden");
+        }
+
+      });
+
+    }
+  );
+
+});

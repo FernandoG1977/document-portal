@@ -701,3 +701,21 @@ th{
 .admin-requirement-actions .action-link:hover {
   text-decoration: underline;
 }
+/* Checkboxes del formulario de clientes */
+#clientForm label:has(input[type="checkbox"]) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  font-weight: 700;
+}
+
+#clientForm input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  flex: 0 0 18px;
+  cursor: pointer;
+}

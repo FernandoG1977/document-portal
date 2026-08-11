@@ -15,6 +15,7 @@
 </div>
 
 <div id="clientsSection" class="hidden">
+
   <div class="admin-head">
     <div>
       <p class="eyebrow">Administración</p>
@@ -26,24 +27,86 @@
     </button>
   </div>
 
-   <label>
-      <input type="checkbox" id="clientCertified">
-      Empresa certificada
-    </label>
+  <div id="clientsList">
+    Cargando clientes...
+  </div>
 
-    <div>
-      <button type="submit" id="saveClientBtn">
-        Guardar cambios
-      </button>
+  <div id="clientFormWrap" class="hidden">
 
-      <button type="button" id="cancelClientBtn" class="secondary">
-        Cancelar
-      </button>
-    </div>
+    <h2>Editar cliente</h2>
 
-  </form>
+    <form id="clientForm">
 
-</div>
+      <input type="hidden" id="clientId">
+
+      <label>
+        Empresa
+        <input type="text" id="clientCompany" required>
+      </label>
+
+      <label>
+        Correo
+        <input type="email" id="clientEmail" readonly>
+      </label>
+
+      <label>
+        Tipo de persona
+        <select id="clientPersonType">
+          <option value="fisica">Física</option>
+          <option value="moral">Moral</option>
+        </select>
+      </label>
+
+      <label>
+        Operación
+        <select id="clientOperationType">
+          <option value="importacion">Importación</option>
+          <option value="exportacion">Exportación</option>
+          <option value="ambas">Ambas</option>
+        </select>
+      </label>
+
+      <label>
+        Tipo de proceso
+        <select id="clientProcessType">
+          <option value="alta">Alta</option>
+          <option value="operacion">Operación</option>
+        </select>
+      </label>
+
+      <label>
+        <input type="checkbox" id="clientSectorRegistry">
+        Padrón sectorial
+      </label>
+
+      <label>
+        <input type="checkbox" id="clientImmex">
+        IMMEX
+      </label>
+
+      <label>
+        <input type="checkbox" id="clientProsec">
+        PROSEC
+      </label>
+
+      <label>
+        <input type="checkbox" id="clientCertified">
+        Empresa certificada
+      </label>
+
+      <div>
+        <button type="submit" id="saveClientBtn">
+          Guardar cambios
+        </button>
+
+        <button type="button" id="cancelClientBtn" class="secondary">
+          Cancelar
+        </button>
+      </div>
+
+    </form>
+
+  </div>
 
 </div>
 

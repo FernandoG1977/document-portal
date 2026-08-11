@@ -306,6 +306,47 @@ console.log(
   "REQUISITOS ADMIN:",
   requirements
 );
+ let approvedCount = 0;
+let pendingCount = 0;
+let rejectedCount = 0;
+let missingCount = 0;
+
+requirements.forEach(req => {
+  const documentForRequirement =
+    clientDocuments.find(
+      d => d.requirement_code === req.code
+    );
+
+  if (!documentForRequirement) {
+    missingCount++;
+    return;
+  }
+
+  if (documentForRequirement.status === "approved") {
+    approvedCount++;
+  } else if (documentForRequirement.status === "rejected") {
+    rejectedCount++;
+  } else {
+    pendingCount++;
+  }
+});
+
+$("adminTotalRequirements").textContent =
+  requirements.length;
+
+$("adminApprovedRequirements").textContent =
+  approvedCount;
+
+$("adminPendingRequirements").textContent =
+  pendingCount;
+
+$("adminRejectedRequirements").textContent =
+  rejectedCount;
+
+$("adminMissingRequirements").textContent =
+  missingCount;
+
+summary.classList.remove("hidden"); 
 }
 function render() {
   const q =

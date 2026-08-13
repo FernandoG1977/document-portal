@@ -127,8 +127,67 @@
   </div>
 
   <div id="requirementsAdminList">
-    Cargando requisitos...
-  </div>
+  Cargando requisitos...
+</div>
+
+<div id="requirementFormWrap" class="hidden">
+
+  <h2>Editar requisito</h2>
+
+  <form id="requirementForm">
+
+    <input type="hidden" id="requirementId">
+
+    <label>
+      Código
+      <input type="text" id="requirementCode" readonly>
+    </label>
+
+    <label>
+      Nombre del requisito
+      <input type="text" id="requirementTitle" required>
+    </label>
+
+    <label>
+      Categoría
+      <input type="text" id="requirementCategory">
+    </label>
+
+    <label>
+      Aplica a
+      <select id="requirementAppliesTo">
+        <option value="all">Todos</option>
+        <option value="fisica">Persona física</option>
+        <option value="moral">Persona moral</option>
+      </select>
+    </label>
+
+    <label>
+      <input type="checkbox" id="requirementRequired">
+      Obligatorio
+    </label>
+
+    <label>
+      <input type="checkbox" id="requirementAllowNA">
+      Permitir "No aplica"
+    </label>
+
+    <div>
+      <button type="submit" id="saveRequirementBtn">
+        Guardar cambios
+      </button>
+
+      <button
+        type="button"
+        id="cancelRequirementBtn"
+        class="secondary">
+        Cancelar
+      </button>
+    </div>
+
+  </form>
+
+</div>
 
 </div>
 

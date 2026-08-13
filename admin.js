@@ -984,8 +984,12 @@ adminTabs.forEach(tab => {
 if (target === "clientsSection") {
   loadClientsAdmin();
 }
-      adminSections.forEach(sectionId => {
 
+if (target === "requirementsSection") {
+  loadRequirementsAdmin();
+}
+
+adminSections.forEach(sectionId => {
         const section =
           document.getElementById(sectionId);
 
@@ -1206,3 +1210,98 @@ $("cancelClientBtn")?.addEventListener(
 
   }
 );
+async function loadRequirementsAdmin() {
+
+  const requirementsList =
+    $("requirementsAdminList");
+
+  if (!requirementsList) return;
+
+  requirementsList.innerHTML =
+    "Cargando requisitos...";
+
+  const {
+    data: requirements,
+    error
+  } =
+    await sb
+      .from("document_requirements")
+      .select(`
+        id,
+        code,
+        title,
+        category,
+        applies_to,
+        required,
+        allow_not_applicable,
+        template_file
+      `)
+      .order("code", {
+        ascending: true
+      });
+
+  if (error) {
+
+    console.error(
+      "No fue posible cargar los requisitos:",
+      error
+    );
+
+    requirementsList.innerHTML =
+      "No fue posible cargar los requisitos.";
+
+    return;
+  }
+
+  if (!requirements?.length) {
+
+    requirementsList.innerHTML =
+      "No hay requisitos registrados.";
+
+    return;
+  }
+
+  requirementsList.innerHTML = "";
+
+  requirements.forEach(req => {
+
+    const row =
+      document.createElement("div");
+
+    row.className =
+      "requirement-admin-row";
+
+    const requiredLabel =
+      req.required
+        ? "Obligatorio"
+        : "Condicional";
+
+    row.innerHTML = `
+      <div>
+        <strong>${esc(req.code)}</strong>
+      </div>
+
+      <div>
+        ${esc(req.title || "—")}
+      </div>
+
+      <div>
+        ${esc(req.category || "—")}
+      </div>
+
+      <div>
+        ${esc(requiredLabel)}
+      </div>
+
+      <button
+        type="button"
+        class="requirement-edit-btn">
+        Editar
+      </button>
+    `;
+
+    requirementsList.appendChild(row);
+
+  });
+
+}

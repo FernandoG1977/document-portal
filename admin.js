@@ -1124,6 +1124,11 @@ if (formWrap && form) {
     client.is_certified_company === true;
 
   formWrap.classList.remove("hidden");
+
+formWrap.scrollIntoView({
+  behavior: "smooth",
+  block: "start"
+});
       }
     }
   );

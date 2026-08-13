@@ -1302,6 +1302,51 @@ async function loadRequirementsAdmin() {
 
     requirementsList.appendChild(row);
 
+    const editButton =
+  row.querySelector(".requirement-edit-btn");
+
+if (editButton) {
+
+  editButton.addEventListener(
+    "click",
+    () => {
+
+      const formWrap =
+        $("requirementFormWrap");
+
+      const form =
+        $("requirementForm");
+
+      if (formWrap && form) {
+
+        $("requirementId").value =
+          req.id || "";
+
+        $("requirementCode").value =
+          req.code || "";
+
+        $("requirementTitle").value =
+          req.title || "";
+
+        $("requirementCategory").value =
+          req.category || "";
+
+        $("requirementAppliesTo").value =
+          req.applies_to || "all";
+
+        $("requirementRequired").checked =
+          req.required === true;
+
+        $("requirementAllowNA").checked =
+          req.allow_not_applicable === true;
+
+        formWrap.classList.remove("hidden");
+      }
+
+    }
+  );
+
+}
   });
 
 }

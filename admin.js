@@ -1355,3 +1355,45 @@ if (editButton) {
   });
 
 }
+// =====================================================
+// GUARDAR CAMBIOS DE REQUISITOS
+// =====================================================
+
+$("requirementForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const requirementId = $("requirementId")?.value;
+
+    if (!requirementId) {
+        alert("No se encontró el requisito que se desea actualizar.");
+        return;
+    }
+
+    const changes = {
+        title: $("requirementTitle")?.value.trim(),
+        category: $("requirementCategory")?.value.trim(),
+        applies_to: $("requirementAppliesTo")?.value,
+        required: $("requirementRequired")?.checked || false,
+        allow_not_applicable: $("requirementAllowNA")?.checked || false
+    };
+
+    const { error } = await sb
+        .from("document_requirements")
+        .update(changes)
+        .eq("id", requirementId);
+
+    if (error) {
+        console.error("Error al actualizar requisito:", error);
+        alert(
+            "No fue posible guardar los cambios: " +
+            error.message
+        );
+        return;
+    }
+
+    alert("Requisito actualizado correctamente.");
+
+    $("requirementFormWrap")?.classList.add("hidden");
+
+    await loadRequirementsAdmin();
+});

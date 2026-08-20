@@ -1397,3 +1397,252 @@ $("requirementForm")?.addEventListener("submit", async (e) => {
 
     await loadRequirementsAdmin();
 });
+// ==============================
+// FORMATOS / PLANTILLAS
+// ==============================
+
+async function loadTemplateRequirements() {
+  const select = $("templateRequirement");
+  if (!select) return;
+
+  const { data, error } = await sb
+    .from("document_requirements")
+    .select("code,title")
+    .order("sort_order", { ascending: true });
+
+  if (error) {
+    console.error("Error al cargar requisitos para formatos:", error);
+    return;
+  }
+
+  select.innerHTML =
+    '<option value="">Selecciona un requisito</option>' +
+    (data || [])
+      .map(
+        (r) =>
+          `<option value="${esc(r.code)}">${esc(r.code)} - ${esc(
+            r.title
+          )}</option>`
+      )
+      .join("");
+}
+
+async function loadTemplatesAdmin() {
+  const list = $("templatesList");
+  if (!list) return;
+
+  list.innerHTML = "Cargando formatos...";
+
+  const { data, error } = await sb
+    .from("requirement_templates")
+    .select(
+      "id,requirement_code,title,file_path,file_name,sort_order,active,created_at"
+    )
+    .order("requirement_code", { ascending: true })
+    .order("sort_order", { ascending: true });
+
+  if (error) {
+    console.error("Error al cargar formatos:", error);
+    list.innerHTML = "No fue posible cargar los formatos.";
+    return;
+  }
+
+  if (!data?.length) {
+    list.innerHTML = "<p>No hay formatos registrados.</p>";
+    return;
+  }
+
+  list.innerHTML = data
+    .map(
+      (item) => `
+        <div class="template-row" style="padding:14px 0;border-bottom:1px solid #ddd;">
+          <div>
+            <strong>${esc(item.requirement_code)} - ${esc(item.title)}</strong>
+            <div style="margin-top:4px;font-size:14px;">
+              ${esc(item.file_name || item.file_path)}
+            </div>
+          </div>
+
+          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+            <button
+              type="button"
+              class="secondary"
+              data-template-download="${item.id}">
+              Descargar
+            </button>
+
+            <button
+              type="button"
+              class="secondary"
+              data-template-delete="${item.id}">
+              Eliminar
+            </button>
+          </div>
+        </div>
+      `
+    )
+    .join("");
+}
+$("templateForm")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const requirementCode = $("templateRequirement")?.value;
+  const title = $("templateTitle")?.value.trim();
+  const file = $("templateFile")?.files?.[0];
+
+  if (!requirementCode || !title || !file) {
+    alert("Completa todos los campos del formato.");
+    return;
+  }
+
+  const safeName = file.name.replace(/[^\w.\-]+/g, "_");
+  const filePath = `${requirementCode}/${Date.now()}_${safeName}`;
+
+  const { error: uploadError } = await sb.storage
+    .from("templates")
+    .upload(filePath, file, {
+      upsert: false
+    });
+
+  if (uploadError) {
+    console.error("Error al subir formato:", uploadError);
+    alert("No fue posible subir el archivo: " + uploadError.message);
+    return;
+  }
+
+  const { data: existingTemplates, error: countError } = await sb
+    .from("requirement_templates")
+    .select("id")
+    .eq("requirement_code", requirementCode);
+
+  if (countError) {
+    console.error("Error al calcular orden del formato:", countError);
+  }
+
+  const nextOrder = (existingTemplates?.length || 0) + 1;
+
+  const { error: insertError } = await sb
+    .from("requirement_templates")
+    .insert({
+      requirement_code: requirementCode,
+      title,
+      file_path: filePath,
+      file_name: file.name,
+      sort_order: nextOrder,
+      active: true
+    });
+
+  if (insertError) {
+    console.error("Error al registrar formato:", insertError);
+
+    await sb.storage
+      .from("templates")
+      .remove([filePath]);
+
+    alert("No fue posible registrar el formato: " + insertError.message);
+    return;
+  }
+
+  alert("Formato guardado correctamente.");
+
+  $("templateForm")?.reset();
+
+  await loadTemplatesAdmin();
+});
+
+
+$("templatesList")?.addEventListener("click", async (e) => {
+
+  const downloadBtn = e.target.closest("[data-template-download]");
+  const deleteBtn = e.target.closest("[data-template-delete]");
+
+  if (downloadBtn) {
+
+    const templateId = downloadBtn.dataset.templateDownload;
+
+    const { data, error } = await sb
+      .from("requirement_templates")
+      .select("file_path,file_name")
+      .eq("id", templateId)
+      .single();
+
+    if (error || !data) {
+      console.error("Error al obtener formato:", error);
+      alert("No fue posible localizar el formato.");
+      return;
+    }
+
+    const { data: signedData, error: signedError } =
+      await sb.storage
+        .from("templates")
+        .createSignedUrl(data.file_path, 60);
+
+    if (signedError || !signedData?.signedUrl) {
+      console.error("Error al generar descarga:", signedError);
+      alert("No fue posible generar la descarga.");
+      return;
+    }
+
+    const link = document.createElement("a");
+    link.href = signedData.signedUrl;
+    link.download = data.file_name || "formato";
+    link.target = "_blank";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    return;
+  }
+
+
+  if (deleteBtn) {
+
+    const templateId = deleteBtn.dataset.templateDelete;
+
+    if (!confirm("¿Deseas eliminar este formato?")) {
+      return;
+    }
+
+    const { data, error } = await sb
+      .from("requirement_templates")
+      .select("file_path")
+      .eq("id", templateId)
+      .single();
+
+    if (error || !data) {
+      console.error("Error al localizar formato:", error);
+      alert("No fue posible localizar el formato.");
+      return;
+    }
+
+    const { error: storageError } =
+      await sb.storage
+        .from("templates")
+        .remove([data.file_path]);
+
+    if (storageError) {
+      console.error("Error al eliminar archivo:", storageError);
+      alert("No fue posible eliminar el archivo.");
+      return;
+    }
+
+    const { error: deleteError } = await sb
+      .from("requirement_templates")
+      .delete()
+      .eq("id", templateId);
+
+    if (deleteError) {
+      console.error("Error al eliminar registro:", deleteError);
+      alert("El archivo se eliminó, pero no fue posible borrar el registro.");
+      return;
+    }
+
+    await loadTemplatesAdmin();
+  }
+});
+document
+  .querySelector('[data-section="formatsSection"]')
+  ?.addEventListener("click", async () => {
+    await loadTemplateRequirements();
+    await loadTemplatesAdmin();
+  });

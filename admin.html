@@ -192,9 +192,76 @@
 </div>
 
 <div id="formatsSection" class="hidden">
-  <p class="eyebrow">Administración</p>
-  <h1>Formatos</h1>
-  <p>Formatos editables y documentos descargables.</p>
+
+  <div class="admin-head">
+    <div>
+      <p class="eyebrow">Administración</p>
+      <h1>Formatos</h1>
+      <p>Administra los formatos editables y documentos descargables.</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px;">
+
+    <h2>Nuevo formato</h2>
+
+    <form id="templateForm">
+
+      <div class="field">
+        <label for="templateRequirement">
+          Requisito
+        </label>
+
+        <select id="templateRequirement" required>
+          <option value="">Selecciona un requisito</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="templateTitle">
+          Nombre del formato
+        </label>
+
+        <input
+          type="text"
+          id="templateTitle"
+          placeholder="Ej. Cuestionario de Seguridad - Formato 1"
+          required
+        >
+      </div>
+
+      <div class="field">
+        <label for="templateFile">
+          Archivo
+        </label>
+
+        <input
+          type="file"
+          id="templateFile"
+          required
+        >
+      </div>
+
+      <div style="margin-top:16px;">
+        <button type="submit" id="saveTemplateBtn">
+          Guardar formato
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+
+  <div class="card" style="margin-top:20px;">
+
+    <h2>Formatos registrados</h2>
+
+    <div id="templatesList">
+      Cargando formatos...
+    </div>
+
+  </div>
+
 </div>
 
 </div>

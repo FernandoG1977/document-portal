@@ -1005,7 +1005,16 @@ if (documentForRequirement) {
 }
 } else {
 
-  missingCount++;
+  const isOptional =
+    req.title?.toLowerCase().includes("(opcional)");
+
+  if (isOptional) {
+    state = "Opcional";
+    stateClass = "state-optional";
+  } else {
+    missingCount++;
+  }
+
 }
 
 const openRequirementButton =

@@ -106,6 +106,80 @@ async function loadRequirements(profile) {
     select.appendChild(option);
   });
 }
+async function loadRequirementTemplates(requirementCode) {
+  const wrap = $("requirementTemplatesWrap");
+  const list = $("requirementTemplatesList");
+
+  if (!wrap || !list) return;
+
+  wrap.classList.add("hidden");
+  list.innerHTML = "";
+
+  if (!requirementCode) return;
+
+  const { data, error } = await sb
+    .from("requirement_templates")
+    .select("id,title,file_path,file_name,sort_order")
+    .eq("requirement_code", requirementCode)
+    .eq("active", true)
+    .order("sort_order", { ascending: true });
+
+  if (error) {
+    console.error("Error al cargar formatos del requisito:", error);
+    return;
+  }
+
+  if (!data?.length) return;
+
+  list.innerHTML = data
+    .map(
+      item => `
+        <div style="margin-bottom:8px;">
+          <button
+            type="button"
+            class="requirement-template-download"
+            data-template-path="${esc(item.file_path)}"
+            data-template-name="${esc(item.file_name || item.title)}">
+            Descargar ${esc(item.title)}
+          </button>
+        </div>
+      `
+    )
+    .join("");
+
+  wrap.classList.remove("hidden");
+}
+
+$("requirementCode")?.addEventListener("change", async (e) => {
+  await loadRequirementTemplates(e.target.value);
+});
+
+$("requirementTemplatesList")?.addEventListener("click", async (e) => {
+  const btn = e.target.closest(".requirement-template-download");
+  if (!btn) return;
+
+  const filePath = btn.dataset.templatePath;
+  const fileName = btn.dataset.templateName || "formato";
+
+  const { data, error } = await sb.storage
+    .from("templates")
+    .createSignedUrl(filePath, 60);
+
+  if (error || !data?.signedUrl) {
+    console.error("Error al generar descarga del formato:", error);
+    alert("No fue posible descargar el formato.");
+    return;
+  }
+
+  const link = document.createElement("a");
+  link.href = data.signedUrl;
+  link.download = fileName;
+  link.target = "_blank";
+
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+});
 
 /* ================================================
    RECUPERACIÓN DE CONTRASEÑA

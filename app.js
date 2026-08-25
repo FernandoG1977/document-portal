@@ -612,8 +612,6 @@ sb.auth.onAuthStateChange(
    LOGIN
    ====================================================== */
 
-console.log("LOGIN LISTENER CARGADO");
-
 $("loginForm")?.addEventListener(
   "submit",
   async e => {

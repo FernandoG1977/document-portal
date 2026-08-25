@@ -14,6 +14,7 @@ const escapeHtml = s =>
     '"': "&quot;",
     "'": "&#039;"
   }[m]));
+const esc = escapeHtml;
 
 const formatDate = value =>
   new Intl.DateTimeFormat("es-MX", {

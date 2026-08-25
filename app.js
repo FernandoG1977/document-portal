@@ -76,7 +76,7 @@ async function loadRequirements(profile) {
     return rule.requirement_level !== "not_applicable";
   });
 
-  const codes = applicableRules.map(rule => rule.requirement_code);
+  const codes = [...new Set(applicableRules.map(rule => rule.requirement_code))];
 
   if (!codes.length) return;
 

@@ -571,10 +571,17 @@ th{
 }
 
 .state-missing{
-  color:#667085;
-  background:#f3f5f7;
-  border:1px solid #d9dee5;
+    color:#667085;
+    background:#f3f5f7;
+    border:1px solid #d9dee5;
 }
+
+.state-optional{
+    color:#075985;
+    background:#f0f9ff;
+    border:1px solid #bae6fd;
+}
+
 /* ===== Acciones dentro del expediente ===== */
 
 .requirement-actions{

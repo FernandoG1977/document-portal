@@ -549,35 +549,46 @@ await loadMine();
 }
 
 
-/* ======================================================
+/* =============================================
    INICIALIZACIÓN
-   ====================================================== */
+   ============================================= */
 
-const recovery =
-  await establishRecoverySession();
+async function initializeAuth() {
 
+  const recovery =
+    await establishRecoverySession();
 
-if (recovery.recovery) {
+  if (recovery.recovery) {
 
-  if (
-    recovery.error ||
-    !recovery.session
-  ) {
+    if (
+      recovery.error ||
+      !recovery.session
+    ) {
 
-    showRecoveryError(
-      recovery.error?.message
-    );
+      showRecoveryError(
+        recovery.error?.message
+      );
 
-  } else {
+    } else {
 
-    showRecoveryForm();
+      showRecoveryForm();
+
+    }
+
+    return;
   }
 
-} else {
-
   const {
-    data: { session }
+    data: { session },
+    error
   } = await sb.auth.getSession();
+
+  if (error) {
+    console.error(
+      "Error al recuperar sesión:",
+      error
+    );
+  }
 
   await showForSession(session);
 }
@@ -1376,3 +1387,5 @@ $("refreshBtn")?.addEventListener(
   "click",
   loadMine
 );
+
+initializeAuth();

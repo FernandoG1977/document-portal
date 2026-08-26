@@ -95,7 +95,7 @@ async function loadRequirements(profile) {
     return;
   }
 
-  requirements.forEach(item => {
+  [...new Map(requirements.map(item => [item.code, item])).values()].forEach(item => {
     const rule = applicableRules.find(
       r => r.requirement_code === item.code
     );

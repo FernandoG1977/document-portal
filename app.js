@@ -95,7 +95,10 @@ async function loadRequirements(profile) {
     return;
   }
 
-  [...new Map(requirements.map(item => [item.code, item])).values()].forEach(item => {
+  select.innerHTML =
+  '<option value="">Selecciona un requisito</option>';
+
+[...new Map(requirements.map(item => [item.code, item])).values()].forEach(item => {
     const rule = applicableRules.find(
       r => r.requirement_code === item.code
     );

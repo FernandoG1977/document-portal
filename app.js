@@ -608,6 +608,188 @@ if (profile && profile.role === "client") {
     programs.length
       ? programs.join(" · ")
       : "Ninguno registrado";
+  // ==========================================
+// EDICIÓN DEL PERFIL DEL CLIENTE
+// ==========================================
+
+const editProfileBtn = $("editProfileBtn");
+const cancelProfileBtn = $("cancelProfileBtn");
+const saveProfileBtn = $("saveProfileBtn");
+const profileEditPanel = $("profileEditPanel");
+
+if (
+  editProfileBtn &&
+  cancelProfileBtn &&
+  saveProfileBtn &&
+  profileEditPanel
+) {
+
+  editProfileBtn.onclick = () => {
+
+    const personValueMap = {
+      fisica: "fisica",
+      moral: "moral",
+      foreign: "foreign"
+    };
+
+    const operationValueMap = {
+      import: "importacion",
+      importacion: "importacion",
+      export: "exportacion",
+      exportacion: "exportacion",
+      both: "ambas",
+      ambas: "ambas"
+    };
+
+    const processValueMap = {
+      initial: "alta",
+      alta: "alta",
+      regular: "regular",
+      update: "actualizacion",
+      actualizacion: "actualizacion"
+    };
+
+    $("editPersonType").value =
+      personValueMap[profile.person_type] || "fisica";
+
+    $("editOperationType").value =
+      operationValueMap[profile.operation_type] || "ambas";
+
+    $("editProcessType").value =
+      processValueMap[profile.process_type] || "alta";
+
+    $("editSectorRegistry").checked =
+      Boolean(profile.has_sector_registry);
+
+    $("editImmex").checked =
+      Boolean(profile.has_immex);
+
+    $("editProsec").checked =
+      Boolean(profile.has_prosec);
+
+    $("editCertifiedCompany").checked =
+      Boolean(profile.is_certified_company);
+
+    profileEditPanel.classList.remove("hidden");
+
+    editProfileBtn.classList.add("hidden");
+  };
+
+
+  cancelProfileBtn.onclick = () => {
+
+    profileEditPanel.classList.add("hidden");
+
+    editProfileBtn.classList.remove("hidden");
+  };
+
+
+  saveProfileBtn.onclick = async () => {
+
+    const updatedProfile = {
+      person_type:
+        $("editPersonType").value,
+
+      operation_type:
+        $("editOperationType").value,
+
+      process_type:
+        $("editProcessType").value,
+
+      has_sector_registry:
+        $("editSectorRegistry").checked,
+
+      has_immex:
+        $("editImmex").checked,
+
+      has_prosec:
+        $("editProsec").checked,
+
+      is_certified_company:
+        $("editCertifiedCompany").checked
+    };
+
+    saveProfileBtn.disabled = true;
+    saveProfileBtn.textContent = "Guardando...";
+
+    const { error: updateProfileError } =
+      await sb
+        .from("profiles")
+        .update(updatedProfile)
+        .eq("id", session.user.id);
+
+    if (updateProfileError) {
+
+      alert(
+        "No fue posible actualizar el perfil: " +
+        updateProfileError.message
+      );
+
+      saveProfileBtn.disabled = false;
+      saveProfileBtn.textContent =
+        "Guardar cambios";
+
+      return;
+    }
+
+    Object.assign(
+      profile,
+      updatedProfile
+    );
+
+    $("profilePersonType").textContent =
+      personTypeMap[profile.person_type] ||
+      profile.person_type ||
+      "—";
+
+    $("profileOperationType").textContent =
+      operationTypeMap[profile.operation_type] ||
+      profile.operation_type ||
+      "—";
+
+    $("profileProcessType").textContent =
+      processTypeMap[profile.process_type] ||
+      profile.process_type ||
+      "—";
+
+    const updatedPrograms = [];
+
+    if (profile.has_sector_registry) {
+      updatedPrograms.push("Padrón Sectorial");
+    }
+
+    if (profile.has_immex) {
+      updatedPrograms.push("IMMEX");
+    }
+
+    if (profile.has_prosec) {
+      updatedPrograms.push("PROSEC");
+    }
+
+    if (profile.is_certified_company) {
+      updatedPrograms.push("Empresa Certificada");
+    }
+
+    $("profilePrograms").textContent =
+      updatedPrograms.length
+        ? updatedPrograms.join(" · ")
+        : "Ninguno registrado";
+
+    await loadRequirements(profile);
+    await loadMine();
+
+    profileEditPanel.classList.add("hidden");
+    editProfileBtn.classList.remove("hidden");
+
+    saveProfileBtn.disabled = false;
+    saveProfileBtn.textContent =
+      "Guardar cambios";
+
+    alert(
+      "Perfil actualizado correctamente."
+    );
+  };
+}
 }
     
 await loadRequirements(profile);

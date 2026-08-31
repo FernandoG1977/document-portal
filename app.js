@@ -1029,7 +1029,16 @@ const openRequirementButton =
         Abrir
       </a>
     `
-    : "";
+    : !req.title?.toLowerCase().includes("(opcional)")
+      ? `
+        <button
+          type="button"
+          class="requirement-upload-btn"
+          data-code="${escapeHtml(req.code)}">
+          Cargar
+        </button>
+      `
+      : "";
 
 const row =
   document.createElement("div");
@@ -1083,6 +1092,37 @@ if (
         signed.signedUrl,
         "_blank"
       );
+    }
+  );
+}
+
+    const requirementUploadBtn =
+  row.querySelector(".requirement-upload-btn");
+
+if (requirementUploadBtn) {
+  requirementUploadBtn.addEventListener(
+    "click",
+    async () => {
+
+      $("requirementCode").value =
+        requirementUploadBtn.dataset.code;
+
+      await loadRequirementTemplates(
+        requirementUploadBtn.dataset.code
+      );
+
+      $("requirementCode").dispatchEvent(
+        new Event("change")
+      );
+
+      $("uploadForm").scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+
+      setTimeout(() => {
+        $("documents")?.click();
+      }, 500);
     }
   );
 }

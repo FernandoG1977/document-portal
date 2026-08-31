@@ -536,6 +536,75 @@ if (!profileError && profile?.role === "client" && profile?.company) {
 $("userEmail").textContent =
   session.user.email;
 
+    // ==========================================
+// DATOS DEL PERFIL DEL CLIENTE
+// ==========================================
+
+if (profile && profile.role === "client") {
+
+  $("profileClientName").textContent =
+    profile.company || "—";
+
+  $("profileEmail").textContent =
+    session.user.email || "—";
+
+  const personTypeMap = {
+    moral: "Persona Moral",
+    fisica: "Persona Física",
+    foreign: "Persona Extranjera"
+  };
+
+  $("profilePersonType").textContent =
+    personTypeMap[profile.person_type] ||
+    profile.person_type ||
+    "—";
+
+  const operationTypeMap = {
+    import: "Importación",
+    export: "Exportación",
+    both: "Importación y Exportación"
+  };
+
+  $("profileOperationType").textContent =
+    operationTypeMap[profile.operation_type] ||
+    profile.operation_type ||
+    "—";
+
+  const processTypeMap = {
+    regular: "Operación Regular",
+    initial: "Alta Inicial",
+    update: "Actualización de Expediente"
+  };
+
+  $("profileProcessType").textContent =
+    processTypeMap[profile.process_type] ||
+    profile.process_type ||
+    "—";
+
+  const programs = [];
+
+  if (profile.has_sector_registry) {
+    programs.push("Padrón Sectorial");
+  }
+
+  if (profile.has_immex) {
+    programs.push("IMMEX");
+  }
+
+  if (profile.has_prosec) {
+    programs.push("PROSEC");
+  }
+
+  if (profile.is_certified_company) {
+    programs.push("Empresa Certificada");
+  }
+
+  $("profilePrograms").textContent =
+    programs.length
+      ? programs.join(" · ")
+      : "Ninguno registrado";
+}
+    
 await loadRequirements(profile);
 await loadMine();
 

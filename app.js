@@ -1040,16 +1040,54 @@ const openRequirementButton =
       `
       : "";
 
+    const rejectedRequirementActions =
+  documentForRequirement?.status === "rejected"
+    ? `
+      <div class="requirement-rejected-info">
+        <div class="requirement-observation">
+          <strong>Observación:</strong>
+          ${escapeHtml(
+            documentForRequirement.review_comments ||
+            "Documento rechazado por el administrador."
+          )}
+        </div>
+
+        <button
+          type="button"
+          class="requirement-replace-btn"
+          data-code="${escapeHtml(req.code)}">
+          Reemplazar
+        </button>
+
+        <input
+          type="file"
+          class="requirement-replace-file hidden"
+          accept=".pdf,.xml,.xlsx,.xls,.docx,.doc,.jpg,.jpeg,.png"
+        >
+      </div>
+    `
+    : "";
 const row =
   document.createElement("div");
 
 row.className = "requirement-row";
 
 row.innerHTML = `
-  <div class="requirement-code">${escapeHtml(req.code)}</div>
-  <div>${escapeHtml(req.title)}</div>
+  <div class="requirement-code">
+    ${escapeHtml(req.code)}
+  </div>
+
+  <div>
+    ${escapeHtml(req.title)}
+
+    ${rejectedRequirementActions}
+  </div>
+
   <div class="requirement-actions">
-    <span class="requirement-state ${stateClass}">${escapeHtml(state)}</span>
+    <span class="requirement-state ${stateClass}">
+      ${escapeHtml(state)}
+    </span>
+
     ${openRequirementButton}
   </div>
 `;
@@ -1096,7 +1134,112 @@ if (
   );
 }
 
-    const requirementUploadBtn =
+    const requirementReplaceBtn =
+  row.querySelector(".requirement-replace-btn");
+
+const requirementReplaceFile =
+  row.querySelector(".requirement-replace-file");
+
+if (
+  requirementReplaceBtn &&
+  requirementReplaceFile &&
+  documentForRequirement
+) {
+
+  requirementReplaceBtn.addEventListener(
+    "click",
+    () => {
+      requirementReplaceFile.click();
+    }
+  );
+
+  requirementReplaceFile.addEventListener(
+    "change",
+    async () => {
+
+      const file =
+        requirementReplaceFile.files?.[0];
+
+      if (!file) return;
+
+      const ok = confirm(
+        `¿Reemplazar ${documentForRequirement.original_name} por ${file.name}?`
+      );
+
+      if (!ok) {
+        requirementReplaceFile.value = "";
+        return;
+      }
+
+      requirementReplaceBtn.disabled = true;
+      requirementReplaceBtn.textContent =
+        "Reemplazando...";
+
+      const { error: uploadError } =
+        await sb.storage
+          .from(BUCKET)
+          .upload(
+            documentForRequirement.file_path,
+            file,
+            {
+              upsert: true,
+              contentType:
+                file.type ||
+                "application/octet-stream"
+            }
+          );
+
+      if (uploadError) {
+
+        alert(
+          "No fue posible reemplazar el archivo: " +
+          uploadError.message
+        );
+
+        requirementReplaceBtn.disabled = false;
+        requirementReplaceBtn.textContent =
+          "Reemplazar";
+
+        return;
+      }
+
+      const { error: updateError } =
+        await sb
+          .from("documents")
+          .update({
+            original_name: file.name,
+            file_size: file.size,
+            mime_type: file.type || null,
+            status: "pending",
+            review_comments: null,
+            reviewed_by: null,
+            reviewed_at: null
+          })
+          .eq(
+            "id",
+            documentForRequirement.id
+          );
+
+      if (updateError) {
+
+        alert(
+          "El archivo se reemplazó, pero no fue posible actualizar el estado: " +
+          updateError.message
+        );
+
+        return;
+      }
+
+      alert(
+        "Documento reemplazado correctamente. Quedó pendiente de revisión."
+      );
+
+      await loadMine();
+    }
+  );
+}
+
+const requirementUploadBtn =
   row.querySelector(".requirement-upload-btn");
 
 if (requirementUploadBtn) {

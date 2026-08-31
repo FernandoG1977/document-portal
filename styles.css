@@ -741,3 +741,78 @@ th{
   background: #084b87;
   border-color: #084b87;
 }
+
+/* ==========================================
+   PERFIL DEL CLIENTE
+   ========================================== */
+
+.client-profile-card {
+  margin-bottom: 0;
+}
+
+.client-profile-card .section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.client-profile-card .section-title h2 {
+  margin: 4px 0 0;
+  font-size: 24px;
+  color: #0b2447;
+}
+
+.client-profile-card .eyebrow {
+  margin: 0;
+}
+
+.client-profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.client-profile-grid > div {
+  background: #f8fafc;
+  border: 1px solid #dbe4ee;
+  border-radius: 12px;
+  padding: 16px 18px;
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.profile-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.client-profile-grid strong {
+  font-size: 15px;
+  line-height: 1.35;
+  color: #0b2447;
+  overflow-wrap: anywhere;
+}
+
+/* Celda de empresa más destacada */
+.client-profile-grid > div:first-child {
+  background: #f3f7fb;
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+  .client-profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .client-profile-card .section-title h2 {
+    font-size: 21px;
+  }
+}

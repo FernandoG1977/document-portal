@@ -91,18 +91,27 @@
 <section class="card client-profile-card">
 
   <div class="section-title">
-    <div>
-      <p class="eyebrow">MI PERFIL</p>
-      <h2>Datos del cliente</h2>
-    </div>
+
+  <div>
+    <p class="eyebrow">MI PERFIL</p>
+    <h2>Datos del cliente</h2>
   </div>
 
-  <div class="client-profile-grid">
+  <button
+    type="button"
+    id="editProfileBtn"
+    class="secondary">
+    Editar perfil
+  </button>
 
-    <div>
-      <span class="profile-label">Cliente / Empresa</span>
-      <strong id="profileClientName">—</strong>
-    </div>
+</div>
+
+<div class="client-profile-grid">
+
+  <div>
+    <span class="profile-label">Cliente / Empresa</span>
+    <strong id="profileClientName">—</strong>
+  </div>
 
     <div>
       <span class="profile-label">Correo</span>
@@ -130,7 +139,76 @@
     </div>
 
   </div>
+<div id="profileEditPanel" class="profile-edit-panel hidden">
 
+  <div class="grid">
+
+    <label>
+      Tipo de persona
+      <select id="editPersonType">
+        <option value="fisica">Persona Física</option>
+        <option value="moral">Persona Moral</option>
+        <option value="foreign">Persona Extranjera</option>
+      </select>
+    </label>
+
+    <label>
+  Operación
+  <select id="editOperationType">
+    <option value="importacion">Importación</option>
+    <option value="exportacion">Exportación</option>
+    <option value="ambas">Importación y Exportación</option>
+  </select>
+</label>
+
+    <label>
+  Proceso
+  <select id="editProcessType">
+    <option value="alta">Alta de cliente</option>
+    <option value="regular">Operación Regular</option>
+    <option value="actualizacion">Actualización de Expediente</option>
+  </select>
+</label>
+
+  </div>
+
+  <div class="profile-programs-edit">
+
+    <label>
+      <input type="checkbox" id="editSectorRegistry">
+      Padrón Sectorial
+    </label>
+
+    <label>
+      <input type="checkbox" id="editImmex">
+      IMMEX
+    </label>
+
+    <label>
+      <input type="checkbox" id="editProsec">
+      PROSEC
+    </label>
+
+    <label>
+      <input type="checkbox" id="editCertifiedCompany">
+      Empresa Certificada
+    </label>
+
+  </div>
+
+  <div class="profile-edit-actions">
+
+    <button type="button" id="cancelProfileBtn" class="secondary">
+      Cancelar
+    </button>
+
+    <button type="button" id="saveProfileBtn">
+      Guardar cambios
+    </button>
+
+  </div>
+
+</div>
 </section>
 
     <section class="card">

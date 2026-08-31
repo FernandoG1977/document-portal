@@ -560,10 +560,13 @@ if (profile && profile.role === "client") {
     "—";
 
   const operationTypeMap = {
-    import: "Importación",
-    export: "Exportación",
-    both: "Importación y Exportación"
-  };
+  import: "Importación",
+  importacion: "Importación",
+  export: "Exportación",
+  exportacion: "Exportación",
+  both: "Importación y Exportación",
+  ambas: "Importación y Exportación"
+};
 
   $("profileOperationType").textContent =
     operationTypeMap[profile.operation_type] ||
@@ -571,10 +574,12 @@ if (profile && profile.role === "client") {
     "—";
 
   const processTypeMap = {
-    regular: "Operación Regular",
-    initial: "Alta Inicial",
-    update: "Actualización de Expediente"
-  };
+  regular: "Operación Regular",
+  initial: "Alta Inicial",
+  alta: "Alta de cliente",
+  update: "Actualización de Expediente",
+  actualizacion: "Actualización de Expediente"
+};
 
   $("profileProcessType").textContent =
     processTypeMap[profile.process_type] ||

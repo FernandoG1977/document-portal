@@ -1297,13 +1297,73 @@ async function loadRequirementRulesAdmin(requirementCode) {
         ? "Obligatorio"
         : "Opcional / Condicional";
 
-    row.textContent =
-      `${person} | ` +
-      `${operationMap[rule.operation_type] || rule.operation_type || "—"} | ` +
-      `${processMap[rule.process_type] || rule.process_type || "—"} | ` +
-      `${level}`;
+    const ruleText = document.createElement("span");
 
-    rulesList.appendChild(row);
+ruleText.textContent =
+  `${person} | ` +
+  `${operationMap[rule.operation_type] || rule.operation_type || "—"} | ` +
+  `${processMap[rule.process_type] || rule.process_type || "—"} | ` +
+  `${level}`;
+
+const deleteBtn = document.createElement("button");
+
+deleteBtn.type = "button";
+deleteBtn.className = "secondary";
+deleteBtn.textContent = "Eliminar";
+
+deleteBtn.addEventListener(
+  "click",
+  async () => {
+
+    const ok = confirm(
+      "¿Seguro que deseas eliminar esta regla?"
+    );
+
+    if (!ok) {
+      return;
+    }
+
+    deleteBtn.disabled = true;
+    deleteBtn.textContent = "Eliminando...";
+
+    const { error: deleteError } =
+      await sb
+        .from("requirement_rules")
+        .delete()
+        .eq("id", rule.id);
+
+    if (deleteError) {
+
+      console.error(
+        "Error al eliminar regla:",
+        deleteError
+      );
+
+      alert(
+        "No fue posible eliminar la regla: " +
+        deleteError.message
+      );
+
+      deleteBtn.disabled = false;
+      deleteBtn.textContent = "Eliminar";
+
+      return;
+    }
+
+    await loadRequirementRulesAdmin(
+      rule.requirement_code
+    );
+
+    alert(
+      "Regla eliminada correctamente."
+    );
+  }
+);
+
+row.appendChild(ruleText);
+row.appendChild(deleteBtn);
+
+rulesList.appendChild(row);
   });
 }
 

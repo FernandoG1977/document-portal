@@ -1339,6 +1339,15 @@ if (editButton) {
         $("requirementAppliesTo").value =
           req.applies_to || "all";
 
+        $("requirementOperationType").value =
+  req.operation_type || "all";
+
+$("requirementProcessType").value =
+  req.process_type || "all";
+
+$("requirementProgram").value =
+  req.program || "none";
+        
         $("requirementRequired").checked =
           req.required === true;
 

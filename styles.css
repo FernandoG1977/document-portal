@@ -816,3 +816,28 @@ th{
     font-size: 21px;
   }
 }
+/* Botón eliminar en reglas de aplicación */
+.requirement-rule-row button.secondary {
+  display: inline-block;
+  margin-left: 12px;
+  padding: 6px 12px;
+  width: auto;
+  height: auto;
+  background: #0b5a9c;
+  color: #ffffff;
+  border: 1px solid #0b5a9c;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.requirement-rule-row button.secondary:hover {
+  opacity: 0.85;
+}
+.requirement-rule-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 0;
+}

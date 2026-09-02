@@ -1306,6 +1306,173 @@ async function loadRequirementRulesAdmin(requirementCode) {
     rulesList.appendChild(row);
   });
 }
+
+// ==========================================
+// AGREGAR REGLA DE APLICACIÓN
+// ==========================================
+
+$("addRequirementRuleBtn")?.addEventListener(
+  "click",
+  async () => {
+
+    const requirementCode =
+      $("requirementCode")?.value;
+
+    if (!requirementCode) {
+      alert(
+        "Primero selecciona un requisito para editar."
+      );
+      return;
+    }
+
+    const personType =
+      $("rulePersonType")?.value;
+
+    const operationType =
+      $("ruleOperationType")?.value;
+
+    const processType =
+      $("ruleProcessType")?.value;
+
+    const requirementLevel =
+      $("ruleRequirementLevel")?.value;
+
+    if (
+      !personType ||
+      !operationType ||
+      !processType ||
+      !requirementLevel
+    ) {
+      alert(
+        "Completa todos los campos de la regla."
+      );
+      return;
+    }
+
+    const addRuleBtn =
+      $("addRequirementRuleBtn");
+
+    addRuleBtn.disabled = true;
+    addRuleBtn.textContent =
+      "Agregando...";
+
+    // Verificar que no exista la misma regla
+    const {
+      data: existingRules,
+      error: checkError
+    } = await sb
+      .from("requirement_rules")
+      .select("id")
+      .eq(
+        "requirement_code",
+        requirementCode
+      )
+      .eq(
+        "person_type",
+        personType
+      )
+      .eq(
+        "operation_type",
+        operationType
+      )
+      .eq(
+        "process_type",
+        processType
+      )
+      .limit(1);
+
+    if (checkError) {
+
+      console.error(
+        "Error al verificar la regla:",
+        checkError
+      );
+
+      alert(
+        "No fue posible verificar la regla: " +
+        checkError.message
+      );
+
+      addRuleBtn.disabled = false;
+      addRuleBtn.textContent =
+        "Agregar regla";
+
+      return;
+    }
+
+    if (
+      existingRules &&
+      existingRules.length > 0
+    ) {
+
+      alert(
+        "Ya existe una regla con esa combinación."
+      );
+
+      addRuleBtn.disabled = false;
+      addRuleBtn.textContent =
+        "Agregar regla";
+
+      return;
+    }
+
+    const {
+      error: insertError
+    } = await sb
+      .from("requirement_rules")
+      .insert({
+        requirement_code:
+          requirementCode,
+
+        person_type:
+          personType,
+
+        operation_type:
+          operationType,
+
+        process_type:
+          processType,
+
+        requirement_level:
+          requirementLevel,
+
+        notes:
+          null
+      });
+
+    if (insertError) {
+
+      console.error(
+        "Error al agregar regla:",
+        insertError
+      );
+
+      alert(
+        "No fue posible agregar la regla: " +
+        insertError.message
+      );
+
+      addRuleBtn.disabled = false;
+      addRuleBtn.textContent =
+        "Agregar regla";
+
+      return;
+    }
+
+    await loadRequirementRulesAdmin(
+      requirementCode
+    );
+
+    addRuleBtn.disabled = false;
+    addRuleBtn.textContent =
+      "Agregar regla";
+
+    alert(
+      "Regla agregada correctamente."
+    );
+  }
+);
+
 async function loadRequirementsAdmin() {
 
   const requirementsList =

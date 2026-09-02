@@ -1346,16 +1346,17 @@ if (editButton) {
           req.allow_not_applicable === true;
 
         formWrap.classList.remove("hidden");
-        formWrap.scrollIntoView({
+
+formWrap.scrollIntoView({
   behavior: "smooth",
   block: "start"
-      });
+});
 
-    }
-  );
-
-}
-  });
+        }
+      }
+    );
+  }
+});
 
 }
 // =====================================================

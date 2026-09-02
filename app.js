@@ -46,11 +46,15 @@ async function loadRequirements(profile) {
     '<option value="">Selecciona un requisito</option>';
 
   // Obtener las reglas aplicables al perfil del cliente
+  const operationTypes =
+  profile.operation_type === "ambas"
+    ? ["importacion", "exportacion", "ambas"]
+    : [profile.operation_type, "ambas"];
   const { data: rules, error: rulesError } = await sb
     .from("requirement_rules")
     .select("requirement_code, requirement_level")
     .eq("person_type", profile.person_type)
-    .eq("operation_type", profile.operation_type)
+    .in("operation_type", operationTypes)
     .eq("process_type", profile.process_type);
 
   if (rulesError) {

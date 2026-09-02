@@ -578,19 +578,17 @@ if (profile && profile.role === "client") {
     "—";
 
   const processTypeMap = {
-  regular: "Operación Regular",
-  initial: "Alta Inicial",
-  alta: "Alta de cliente",
-  update: "Actualización de Expediente",
-  actualizacion: "Actualización de Expediente"
+  alta: "Alta",
+  actualizacion_anual: "Actualización anual",
+  cambio_domicilio: "Cambio de domicilio"
 };
 
-  $("profileProcessType").textContent =
-    processTypeMap[profile.process_type] ||
-    profile.process_type ||
-    "—";
+$("profileProcessType").textContent =
+  processTypeMap[profile.process_type] ||
+  profile.process_type ||
+  "—";
 
-  const programs = [];
+   const programs = [];
 
   if (profile.has_sector_registry) {
     programs.push("Padrón Sectorial");

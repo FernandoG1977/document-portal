@@ -1215,6 +1215,97 @@ $("cancelClientBtn")?.addEventListener(
 
   }
 );
+async function loadRequirementRulesAdmin(requirementCode) {
+
+  const rulesList = $("requirementRulesList");
+
+  if (!rulesList || !requirementCode) {
+    return;
+  }
+
+  rulesList.textContent = "Cargando reglas...";
+
+  const {
+    data: rules,
+    error
+  } = await sb
+    .from("requirement_rules")
+    .select(`
+      id,
+      requirement_code,
+      person_type,
+      operation_type,
+      process_type,
+      requirement_level,
+      notes
+    `)
+    .eq("requirement_code", requirementCode)
+    .order("person_type")
+    .order("operation_type")
+    .order("process_type");
+
+  if (error) {
+
+    console.error(
+      "No fue posible cargar las reglas:",
+      error
+    );
+
+    rulesList.textContent =
+      "No fue posible cargar las reglas.";
+
+    return;
+  }
+
+  if (!rules || rules.length === 0) {
+
+    rulesList.textContent =
+      "Este requisito todavía no tiene reglas configuradas.";
+
+    return;
+  }
+
+  rulesList.innerHTML = "";
+
+  rules.forEach(rule => {
+
+    const row = document.createElement("div");
+
+    row.className = "requirement-rule-row";
+
+    const person =
+      rule.person_type === "moral"
+        ? "Persona moral"
+        : rule.person_type === "fisica"
+          ? "Persona física"
+          : rule.person_type || "—";
+
+    const operationMap = {
+      importacion: "Importación",
+      exportacion: "Exportación",
+      ambas: "Importación y Exportación"
+    };
+
+    const processMap = {
+      alta: "Alta",
+      regular: "Operación regular",
+      actualizacion: "Actualización"
+    };
+
+    const level =
+      rule.requirement_level === "required"
+        ? "Obligatorio"
+        : "Opcional / Condicional";
+
+    row.textContent =
+      `${person} | ` +
+      `${operationMap[rule.operation_type] || rule.operation_type || "—"} | ` +
+      `${processMap[rule.process_type] || rule.process_type || "—"} | ` +
+      `${level}`;
+
+    rulesList.appendChild(row);
+  });
+}
 async function loadRequirementsAdmin() {
 
   const requirementsList =
@@ -1313,8 +1404,8 @@ async function loadRequirementsAdmin() {
 if (editButton) {
 
   editButton.addEventListener(
-    "click",
-    () => {
+  "click",
+  async () => {
 
       const formWrap =
         $("requirementFormWrap");
@@ -1339,21 +1430,14 @@ if (editButton) {
         $("requirementAppliesTo").value =
           req.applies_to || "all";
 
-        $("requirementOperationType").value =
-  req.operation_type || "all";
-
-$("requirementProcessType").value =
-  req.process_type || "all";
-
-$("requirementProgram").value =
-  req.program || "none";
-        
-        $("requirementRequired").checked =
+       $("requirementRequired").checked =
           req.required === true;
 
         $("requirementAllowNA").checked =
           req.allow_not_applicable === true;
 
+        await loadRequirementRulesAdmin(req.code);
+        
         formWrap.classList.remove("hidden");
 
 formWrap.scrollIntoView({

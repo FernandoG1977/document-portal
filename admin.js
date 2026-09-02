@@ -1287,10 +1287,10 @@ async function loadRequirementRulesAdmin(requirementCode) {
     };
 
     const processMap = {
-      alta: "Alta",
-      regular: "Operación regular",
-      actualizacion: "Actualización"
-    };
+  alta: "Alta",
+  actualizacion_anual: "Actualización anual",
+  cambio_domicilio: "Cambio de domicilio"
+};
 
     const level =
       rule.requirement_level === "required"

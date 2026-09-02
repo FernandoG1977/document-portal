@@ -161,7 +161,36 @@
         <option value="moral">Persona moral</option>
       </select>
     </label>
+<label>
+  Operación
+  <select id="requirementOperationType">
+    <option value="all">Todas</option>
+    <option value="importacion">Importación</option>
+    <option value="exportacion">Exportación</option>
+    <option value="ambas">Importación y Exportación</option>
+  </select>
+</label>
 
+<label>
+  Proceso
+  <select id="requirementProcessType">
+    <option value="all">Todos</option>
+    <option value="alta">Alta de cliente</option>
+    <option value="regular">Operación Regular</option>
+    <option value="actualizacion">Actualización de Expediente</option>
+  </select>
+</label>
+
+<label>
+  Programa / Registro
+  <select id="requirementProgram">
+    <option value="none">Ninguno específico</option>
+    <option value="sector_registry">Padrón Sectorial</option>
+    <option value="immex">IMMEX</option>
+    <option value="prosec">PROSEC</option>
+    <option value="certified_company">Empresa Certificada</option>
+  </select>
+</label>
     <label>
       <input type="checkbox" id="requirementRequired">
       Obligatorio
